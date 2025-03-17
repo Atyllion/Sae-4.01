@@ -1,0 +1,24 @@
+:root {
+  /* primary token */
+  --color-light: #f9f9f9;
+  --color-dark: #1a1a1a;
+  --color-green: #00ff00;
+  --color-red: #ff0000;
+  --color-blue: #0000ff;
+
+  /* sementic token */
+  --color-fg: var(--color-light);
+  --color-bg: var(--color-dark);
+}
+
+@layer base {
+  .dark {
+    --color-fg: var(--color-dark);
+    --color-bg: var(--color-light);
+  }
+
+  .light {
+    --color-fg: var(--color-light);
+    --color-bg: var(--color-dark);
+  }
+}
