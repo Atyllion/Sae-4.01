@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   /* primary token */
   --color-light: #f9f9f9;
@@ -6,9 +8,24 @@
   --color-red: #ff0000;
   --color-blue: #0000ff;
 
+  /* instagram Token */
+  --color-instagram-blue: #405DE6;
+  --color-instagram-purple: #5851DB;
+  --color-instagram-pink: #833AB4;
+
   /* sementic token */
   --color-fg: var(--color-light);
   --color-bg: var(--color-dark);
+}
+
+@theme .light {
+  --color-fg: var(--color-light);
+  --color-bg: var(--color-dark);
+}
+
+@theme .dark {
+  --color-fg: var(--color-dark);
+  --color-bg: var(--color-light);
 }
 
 @layer base {

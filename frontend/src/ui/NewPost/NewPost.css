@@ -5,6 +5,7 @@
     justify-content: center;
     background-color: var(--bg-color);
     border-radius: 8px;
+    padding: 1rem;
     width: 100%; /* Par défaut pour mobile */
 }
 
@@ -16,7 +17,7 @@
 .NewPost__Button {
     border-radius: 8px;
     border: 1px solid transparent;
-    padding: 0.6em 1em; /* Ajustement pour mobile */
+    padding: 1rem 0; /* Ajustement pour mobile */
     font-size: 0.9em; /* Taille plus petite par défaut */
     font-weight: 500;
     font-family: inherit;
@@ -51,7 +52,7 @@
 
 @media screen and (min-width: 768px) {
     .NewPost {
-        width: 50%; /* Largeur augmentée pour les écrans plus larges */
+        width: 100%; /* Largeur augmentée pour les écrans plus larges */
     }
 
     .NewPost__title {
