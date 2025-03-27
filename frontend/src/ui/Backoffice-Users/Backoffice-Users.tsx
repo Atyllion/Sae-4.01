@@ -1,9 +1,6 @@
 // react
 import React, { useEffect, useState } from 'react';
 
-// style
-import './Backoffice-Users.css';
-
 // UI
 import BackofficeUser from '../Backoffice-User/Backoffice-User';
 

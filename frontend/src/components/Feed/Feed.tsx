@@ -64,18 +64,20 @@ export default function Feed() {
 
     return (
         <>
-            <ul className='flex gap-8 flex-col items-center p-4 bg-transparent rounded-lg w-full my-2 list-none md:p-5'>
-            {posts.map((post, index) => (
-                <Post key={`${post.id}-${index}`} content={post.content} created_at={new Date(post.created_at).toISOString()} user={post.user} />
-            ))}
-            </ul>
-            {hasMore && <div ref={lastPostRef} style={{ height: '1px' }}></div>}
-            {isFetching && <p className="text-center mt-4">Chargement de plus de posts...</p>}
-            {!hasMore && posts.length > 0 && (
-            <p className="text-center mt-4">
-                Plus de posts.
-            </p>
-            )}
+            <div className='flex flex-col items-center justify-center'> 
+                <ul className='flex gap-8 flex-col items-center p-4 bg-transparent rounded-lg w-full my-2 list-none md:p-5'>
+                    {posts.map((post, index) => (
+                        <Post key={`${post.id}-${index}`} content={post.content} created_at={new Date(post.created_at).toISOString()} user={post.user} />
+                    ))}
+                </ul>
+                {hasMore && <div ref={lastPostRef} style={{ height: '1px' }}></div>}
+                {isFetching && <p className="text-center mt-4">Chargement de plus de posts...</p>}
+                {!hasMore && posts.length > 0 && (
+                    <p className="text-center m-4 max-w-lg">
+                        Vous avez atteint la fin, recharcher la page pour afficher plus de noueaux posts.
+                    </p>
+                )}
+            </div>
         </>
     );
 }

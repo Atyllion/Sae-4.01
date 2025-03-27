@@ -15,7 +15,6 @@ export default function NavBarProfile() {
                     throw new Error('Failed to fetch user data');
                 })
                 .then((data) => {
-                    console.log('User data:', data); // Affiche les données utilisateur dans la console
                     setUsername(data.user.username); // Affiche username de l'utilisateur dans la navbar
                 })
                 .catch((error) => {

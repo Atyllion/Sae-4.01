@@ -5,7 +5,6 @@ import { fetchUsers } from '../../loader/loader';
 import React from 'react';
 
 // style
-import './Backoffice-User.css';
 import { useState } from 'react';
 import { patchUserById } from '../../loader/loader';
 
