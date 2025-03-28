@@ -82,7 +82,7 @@ export default function Home() {
                   )}
                   <Feed />
                 </div>
-                <NavBar />
+                <NavBar isAdmin={userAdmin} />
               </div>
             </>
           }

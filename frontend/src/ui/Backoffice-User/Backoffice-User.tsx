@@ -63,7 +63,7 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
     return (
         <li className="w-full max-w-md border border-gray-300 rounded-lg shadow-md bg-gray-50 flex flex-col gap-6">
 
-            <div className="flex flex-col gap-6 p-2">
+            <div className="flex flex-col gap-6 p-4 m-2">
 
                 {/* nom d'utilisateur + input */}
                 <div className="flex flex-col justify-center items-start w-full mb-4">
@@ -75,7 +75,7 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
                         id='username__input'
                         type="text"
                         placeholder={`Modifier le nom d'utilisateur de ${user.username}`}
-                        className="mt-2 w-full text-black padding border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
+                        className="mt-2 p-4 w-full text-black padding border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
 
                         onChange={(e) => setUsername(e.target.value)}
                     />
@@ -91,7 +91,7 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
                         id='email__input'
                         type="email"
                         placeholder={`Modifier l'email de ${user.email}`}
-                        className="mt-2 w-full padding border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
+                        className="mt-2 p-4 w-full padding border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
                         onChange={(e) => setEmail(e.target.value)}
                     />
                 </div>
@@ -102,13 +102,14 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
                         id='save__button'
                         onClick={handleSave}
                         type="submit"
-                        className="padding bg-indigo-600 text-white font-medium rounded-md shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75"
+                        className="padding bg-indigo-600 text-white font-medium p-4 rounded-md shadow hover:bg-indigo-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75"
                     >
                         Enregistrer les modifications
                     </button>
                 </div>
 
             </div>
+
         </li>
     );
 }

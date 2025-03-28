@@ -65,7 +65,7 @@ export default function NewPost() {
                 <br /><br />
                 <button
                 id="NewPostButton"
-                className="rounded-lg border border-transparent py-4 px-0 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] cursor-pointer w-full transition-colors duration-200 hover:border-[var(--primary-color)] focus:outline focus:outline-4 focus:outline-webkit-focus-ring-color"
+                className="rounded-lg border border-transparent py-4 px-0 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] cursor-pointer w-full transition-colors duration-200 hover:border-[var(--primary-color)] focus:outline-4 focus:outline-webkit-focus-ring-color"
                 type="submit"
                 >
                 Create Post

@@ -30,14 +30,56 @@ export default function NavBarProfile() {
         window.location.href = '/login';
     }
 
+    const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+
     return (
         <>
             {username ? (
-                <li className="Profile-section">
+                <li className="flex flex-row md:flex-col gap-4 items-center ">
                     <span className="text-bg">Salut {username} !</span>
+
+                    {/* boutton de déconnexion */}
+                    <>
+                        {/* Bouton de déconnexion qui ouvre le pop-up de confirmation */}
+                        <button
+                            onClick={() => setShowConfirmation(true)}
+                            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+                        >
+                            Déconnexion
+                        </button>
+
+                        {/* Pop-up de confirmation */}
+                        {showConfirmation && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                                <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                                    <p className="text-lg font-semibold mb-4">Êtes-vous sûr de vouloir vous déconnecter ?</p>
+                                    <div className="flex justify-center gap-4">
+                                        {/* Bouton pour confirmer la déconnexion */}
+                                        <button
+                                            onClick={() => {
+                                                localStorage.removeItem('token');
+                                                window.location.reload();
+                                            }}
+                                            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300"
+                                        >
+                                            Oui
+                                        </button>
+                                        {/* Bouton pour annuler la déconnexion */}
+                                        <button
+                                            onClick={() => setShowConfirmation(false)}
+                                            className="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300"
+                                        >
+                                            Non
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </>
+
                 </li>
             ) : (
-                <li className="Profile-section">
+                <li className="cursor-pointer">
                     <button
                         onClick={handleClickOnLogin}
                         className="bg-fg rounded-4xl p-2 text-bg"

@@ -12,24 +12,25 @@ export default function LogInForm() {
     setError('');
     setSuccess('');
 
+    console.log('Email:', email);
+    console.log('Password:', password);
+
     try {
-      const response = await loginUser({ email, password });
+        const response = await loginUser({ email, password });
 
-      console.log('Response login :', response);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Token :', data.token); // Log the token
-        setSuccess('Login successful!');
-        localStorage.setItem('token', data.token); // Store the token for future requests
-        window.location.href = '/'; // Redirect to the homepage
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Login failed');
-      }
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Token:', data.token);
+            setSuccess('Login successful!');
+            localStorage.setItem('token', data.token);
+            window.location.href = '/';
+        } else {
+            const errorData = await response.json();
+            setError(errorData.error || 'Login failed');
+        }
     } catch (err) {
-      setError('An error occurred while logging in');
-      console.error('Error logging in:', err);
+        setError('An error occurred while logging in');
+        console.error('Error logging in:', err);
     }
   };
 

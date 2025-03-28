@@ -9,7 +9,7 @@ export async function fetchPosts(page = 1) {
             throw new Error(`Erreur HTTP : ${response.status}`);
         }
         if (response.ok && response.headers.get('Content-Type')?.includes('application/json')) {
-            return await response.json();
+            return response.status === 204 ? null : await response.json();
         }
         return response;
     } catch (error) {
@@ -82,6 +82,24 @@ export async function fetchAllPosts() {
     }
 }
 
+export async function deletePostById(postId: string) {
+    try {
+        const response = await fetch(`${BASE_URL}/post/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP : ${response.status}`);
+        }
+        return; // Return nothing for successful deletion
+    } catch (error) {
+        console.error('Erreur lors de la suppression du post :', error);
+        throw error;
+    }
+}
+
 export async function fetchUsers() {
     try {
         const response = await fetch(`${BASE_URL}/users`);
@@ -134,8 +152,6 @@ export async function loginUser(userData: { email: string; password: string }) {
     console.log("userData", userData);
 
     try {
-        const token = localStorage.getItem('token');
-
         const response = await fetch(`${BASE_URL}/login`, {
             method: 'POST',
             headers: {
@@ -147,16 +163,17 @@ export async function loginUser(userData: { email: string; password: string }) {
             password: userData.password, // Pass the password
             }),
         });
-
-        console.log("response loader :", response);
+        
+        console.log("response loader : ", response);
 
         if (!response.ok) {
             const errorData = await response.json();
             console.error('Error details:', errorData);
-            throw new Error(errorData.error || 'Failed to log in user');
+            throw new Error(errorData.error || 'Invalid credentials. Please check your email and password.');
         }
 
         return response;
+
     } catch (error) {
         console.error('Erreur lors de la connexion de l\'utilisateur :', error);
         throw error;

@@ -32,8 +32,8 @@ export default function BackofficeUsers() {
     const hasNoResults = filteredUsers.length === 0;
 
     return (
-        <div className="user-list flex flex-col gap-4 px-4 sm:px-6 lg:px-8">
-            <div className='flex flex-col gap-4 justify-center items-center'>
+        <div className="flex flex-col gap-4 px-4 sm:px-6 lg:px-8">
+            <div className='flex flex-col gap-4 justify-center items-center m-5'>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 max-w-sm text-center text-fg">
                     Liste des utilisateurs
                 </h1>
@@ -41,7 +41,7 @@ export default function BackofficeUsers() {
                     id='backoffice-search'
                     type="text"
                     placeholder="Rechercher un utilisateur..."
-                    className="mt-2 w-full max-w-sm padding border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="mt-2 p-3 w-full max-w-sm padding border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />

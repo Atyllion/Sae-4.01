@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Post from '../../ui/Post/Post';
 import { fetchPosts, fetchInitialPosts } from '../../loader/loader';
 import { fetchAllTokens } from '../../loader/loader';
+import { fetchUserToken } from '../../loader/loader';
 
 export default function Feed() {
     const [posts, setPosts] = useState([]);
@@ -10,6 +11,7 @@ export default function Feed() {
     const [isFetching, setIsFetching] = useState(false);
     const observer = useRef(null);
 
+    // Fonction pour observer le dernier post
     const lastPostRef = useCallback(
         (node) => {
             if (isFetching) return;
@@ -24,6 +26,7 @@ export default function Feed() {
         [hasMore, isFetching]
     );
 
+    // Fonction pour charger plus de posts
     const fetchMorePosts = useCallback(async () => {
         if (!hasMore || isFetching) return;
 
@@ -45,6 +48,7 @@ export default function Feed() {
         }
     }, [page, hasMore, isFetching]);
 
+    // Chargement des posts initiaux
     useEffect(() => {
         const loadInitialPosts = async () => {
             try {
@@ -62,12 +66,33 @@ export default function Feed() {
         }
     }, [posts.length]);
 
+    // Fonction pour recharger les posts
+    const reloadFeed = useCallback(async () => {
+        setIsFetching(true);
+        try {
+            const data = await fetchInitialPosts();
+            setPosts(data.posts);
+            setPage(data.next_page);
+            setHasMore(data.next_page !== null);
+        } catch (error) {
+            console.error('Erreur lors du rechargement des posts :', error);
+        } finally {
+            setIsFetching(false);
+        }
+    }, []);
+
     return (
         <>
             <div className='flex flex-col items-center justify-center'> 
+                    <button 
+                    className='px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-all duration-300' 
+                    id='reload-feed-button' 
+                    onClick={reloadFeed}>
+                        Recharger
+                    </button>
                 <ul className='flex gap-8 flex-col items-center p-4 bg-transparent rounded-lg w-full my-2 list-none md:p-5'>
                     {posts.map((post, index) => (
-                        <Post key={`${post.id}-${index}`} content={post.content} created_at={new Date(post.created_at).toISOString()} user={post.user} />
+                        <Post key={`${post.id}-${index}`} content={post.content} created_at={new Date(post.created_at).toISOString()} id={post.id} user={post.user} />
                     ))}
                 </ul>
                 {hasMore && <div ref={lastPostRef} style={{ height: '1px' }}></div>}
