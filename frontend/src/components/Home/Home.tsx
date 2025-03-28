@@ -11,6 +11,7 @@ import NavBar from '../NavBar/NavBar';
 import Login from '../Log-in/Log-in';
 import Signin from '../Sign-in/Sign-in';
 import Backoffice from '../Backoffice/Backoffice';
+import Profil from '../Profil/Profil';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Gère l'authentification
@@ -91,6 +92,11 @@ export default function Home() {
         {/* Pages de connexion et d'inscription */}
         <Route path="/login" element={<Login />} />
         <Route path="/signin" element={<Signin />} />
+
+        {/* profile utilisateur */}
+        <Route path="/profil" element={<Profil />} />
+        {/* profil d'un utilisateur spécifique */}
+        <Route path="/user/:userId" element={<Profil />} />
 
         {/* Route pour le backoffice */}
         <Route

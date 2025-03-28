@@ -36,7 +36,15 @@ export default function NavBarProfile() {
         <>
             {username ? (
                 <li className="flex flex-row md:flex-col gap-4 items-center ">
-                    <span className="text-bg">Salut {username} !</span>
+                    {/* Avatar */}
+                    <a
+                        className="text-bg font-bold hover:text-primary transition-all duration-300 ease-in-out transform hover:scale-105"
+                        href="/profil"
+                    >
+                        <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">
+                            Salut {username} !
+                        </span>
+                    </a>
 
                     {/* boutton de déconnexion */}
                     <>

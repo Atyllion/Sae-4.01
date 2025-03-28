@@ -1,4 +1,5 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { fetchUserToken } from '../../loader/loader';
 import { deletePostById } from '../../loader/loader';
 
@@ -37,33 +38,46 @@ export default function Post({ content, created_at, id, user }: { content: strin
     return (
         <li className='flex flex-col list-none w-[90%] p-5 border border-gray-300 rounded-md bg-fg hover:shadow-md hover:bg-fg md:m-2.5 md:p-4 md:rounded-lg md:hover:shadow-lg gap-4'>
 
-            {isAuthor && 
-            <div className='flex w-full justify-between items-center bg-blue-100 p-2 rounded-md shadow-sm hover:bg-blue-200 transition-all duration-300'>
-                <p className='text-xs text-gray-700 font-medium'>Vous</p>
-                <button 
-                    className='bg-red-500 text-white text-sm px-3 py-1 rounded-md hover:bg-red-600 active:scale-95 transition-transform duration-200' 
-                    onClick={() => {
-                        deletePostById(id);
-                        alert('Post supprimé avec succès.');
-                        window.location.reload();
-                    }}
-                >
-                    Supprimer
-                </button>
-            </div>
+            {isAuthor &&
+                <div className='flex w-full justify-between items-center bg-blue-100 p-2 rounded-md shadow-sm hover:bg-blue-200 transition-all duration-300'>
+                    <p className='text-xs text-gray-700 font-medium'>Vous</p>
+                    <button
+                        className='bg-red-500 text-white text-sm px-3 py-1 rounded-md hover:bg-red-600 active:scale-95 transition-transform duration-200'
+                        onClick={() => {
+                            deletePostById(id);
+                            alert('Post supprimé avec succès.');
+                            window.location.reload();
+                        }}
+                    >
+                        Supprimer
+                    </button>
+                </div>
             }
 
-            <p className='text-bg font-bold text-lg max-w-4'>{user?.username || 'Unknown User'}</p>
+            {isAuthor ? (
+                <Link to="/profil" className='flex flex-row items-center gap-4'>
+                    <p className='text-bg font-bold text-lg max-w-4'>{user?.username || 'Unknown User'}</p>
+                </Link>
+            ) : (
+                <Link to={`/user/${user.id}`} className='flex flex-row items-center gap-4'>
+                    <p className='text-bg font-bold text-lg max-w-4 hover:text-blue-500 transition-colors'>{user?.username || 'Unknown User'}</p>
+                </Link>
+            )}
+
             <p className='text-sm text-gray-800 leading-relaxed break-words md:text-base md:leading-loose'>{content}</p>
-            {/* <p className='text-bg'>{id}</p> */}
             <p className='text-gray-500 text-xs italic'>
-                {new Date(created_at).toLocaleString('fr-FR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                })}
+                {(() => {
+                    const date = new Date(created_at);
+                    // Ajoutez explicitement 1 heure si nécessaire
+                    const parisDate = new Date(date.getTime() + 60 * 60 * 1000); // +1 heure en millisecondes
+                    return parisDate.toLocaleString('fr-FR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                    });
+                })()}
             </p>
         </li>
     );

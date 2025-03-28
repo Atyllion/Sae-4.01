@@ -100,6 +100,32 @@ export async function deletePostById(postId: string) {
     }
 }
 
+export async function fetchUserPosts(userId: string, page = 1) {
+    try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            throw new Error('No token found. Please log in to view your posts.');
+        }
+        
+        const response = await fetch(`${BASE_URL}/posts/user/${userId}?page=${page}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        return response.status === 204 ? null : await response.json();
+    } catch (error) {
+        console.error('Error fetching user posts:', error);
+        throw error;
+    }
+}
+
 export async function fetchUsers() {
     try {
         const response = await fetch(`${BASE_URL}/users`);
@@ -115,13 +141,13 @@ export async function fetchUsers() {
 
 export async function fetchUserById(userId: string) {
     try {
-        const response = await fetch(`${BASE_URL}/users/${userId}`);
+        const response = await fetch(`${BASE_URL}/user/profile/${userId}`);
         if (!response.ok) {
-            throw new Error(`Erreur HTTP : ${response.status}`);
+            throw new Error(`HTTP error: ${response.status}`);
         }
         return await response.json();
     } catch (error) {
-        console.error('Erreur lors du chargement de l\'utilisateur :', error);
+        console.error('Error fetching user profile:', error);
         throw error;
     }
 }
