@@ -35,14 +35,14 @@ export default function NavBarProfile() {
     return (
         <>
             {username ? (
-                <li className="flex flex-row md:flex-col gap-4 items-center ">
+                <li className="flex flex-row md:flex-col gap-4 items-center md:scale-110">
                     {/* Avatar */}
                     <a
                         className="text-bg font-bold hover:text-primary transition-all duration-300 ease-in-out transform hover:scale-105"
                         href="/profil"
                     >
-                        <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">
-                            Salut {username} !
+                        <span className="from-primary to-bg bg-clip-text" title="Accès au profil" >
+                            Salut {username}
                         </span>
                     </a>
 
@@ -51,7 +51,8 @@ export default function NavBarProfile() {
                         {/* Bouton de déconnexion qui ouvre le pop-up de confirmation */}
                         <button
                             onClick={() => setShowConfirmation(true)}
-                            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
+                            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 cursor-pointer hover:shadow-lg"
+                            title="Déconnexion" 
                         >
                             Déconnexion
                         </button>
@@ -90,7 +91,8 @@ export default function NavBarProfile() {
                 <li className="cursor-pointer">
                     <button
                         onClick={handleClickOnLogin}
-                        className="bg-fg rounded-4xl p-2 text-bg"
+                        className="bg-fg rounded-4xl p-2 text-bg cursor-pointer hover:shadow-lg transition-all duration-300 ease-in-out transform"
+                        title="Se connecter" 
                     >
                         <img
                             className="max-w-10 max-h-10 aspect-square"

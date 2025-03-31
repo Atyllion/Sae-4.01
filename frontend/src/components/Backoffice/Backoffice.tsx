@@ -5,7 +5,7 @@ import BackofficeUsers from '../../ui/Backoffice-Users/Backoffice-Users';
 import React from 'react';
 
 export default function Backoffice() {
-    return(
+    return (
         <>
             <BackofficeUsers></BackofficeUsers>
         </>

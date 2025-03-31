@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { fetchUserToken, fetchUserById } from '../../loader/loader';
 import Feed from '../Feed/Feed';
 import { useParams } from 'react-router-dom';
+import ProfileHeader from '../../ui/Profil-Header/Profil-Header';
 
 export default function Profil() {
     const { userId } = useParams();
@@ -117,28 +118,13 @@ export default function Profil() {
                     Retour
                 </button>
 
-                <div className='flex flex-col gap-4 p-4 sm:p-6 bg-white rounded-lg shadow-md'>
-                    <h1 className="text-xl text-bg sm:text-2xl font-bold mb-4 text-center sm:text-left">
-                        {isCurrentUser ? 'Mon profil' : `Profil de ${userData.username}`}
-                    </h1>
-                    <p className="text-base text-bg sm:text-lg">
-                        <strong>Nom d'utilisateur :</strong> {userData.username}
-                    </p>
-                    {isCurrentUser && userData.email && (
-                        <p className="text-base text-bg sm:text-lg">
-                            <strong>Email :</strong> {userData.email}
-                        </p>
-                    )}
-                    {userData.isVerified !== undefined && (
-                        <p className="text-base text-bg sm:text-lg">
-                            <strong>Statut :</strong> {userData.isVerified ? (
-                                <span className="text-green-500">Vérifié</span>
-                            ) : (
-                                <span className="text-gray-500">Non vérifié</span>
-                            )}
-                        </p>
-                    )}
-                </div>
+                {/* Header du profil */}
+                <ProfileHeader
+                    userData={userData}
+                    isCurrentUser={isCurrentUser}
+                    loading={loading}
+                    error={error}
+                />
 
                 {/* Feed avec les posts de l'utilisateur */}
                 <Feed 

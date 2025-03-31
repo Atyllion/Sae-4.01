@@ -221,6 +221,14 @@ export async function fetchUserToken(): Promise<Response> {
             },
             credentials: 'include', // Ajoute les informations d'authentification à la requête
         });
+        
+        if (response.status === 401) {
+            // le token n'est plus valide, on le supprime
+            console.error('Token expired or invalid. Removing from localStorage.');
+            localStorage.removeItem('token');
+            throw new Error('Your session has expired. Please log in again.');
+        }
+        
         return response;
     } catch (error) {
         console.error('Erreur lors de la récupération du token :', error);
@@ -259,6 +267,166 @@ export async function signInUser(userData: { username: string; email: string; pa
         return await response.json();
     } catch (error) {
         console.error('Error during user sign-in:', error);
+        throw error;
+    }
+}
+
+export async function toggleLike(postId: string) {
+    try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            throw new Error('No token found. Please log in to like a post.');
+        }
+        
+        const response = await fetch(`${BASE_URL}/api/posts/${postId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error toggling like:', error);
+        throw error;
+    }
+}
+
+export async function getPostLikes(postId: string) {
+    try {
+        const token = localStorage.getItem('token');
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json'
+        };
+        
+        // Ajouter le token à l'en-tête s'il existe
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`${BASE_URL}/api/posts/${postId}/likes`, {
+            headers
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching post likes:', error);
+        throw error;
+    }
+}
+
+export async function followUser(userId: string) {
+    try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            throw new Error('No token found. Please log in to follow users.');
+        }
+        
+        const response = await fetch(`${BASE_URL}/api/users/${userId}/follow`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error following user:', error);
+        throw error;
+    }
+}
+
+export async function unfollowUser(userId: string) {
+    try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            throw new Error('No token found. Please log in to unfollow users.');
+        }
+        
+        const response = await fetch(`${BASE_URL}/api/users/${userId}/unfollow`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error unfollowing user:', error);
+        throw error;
+    }
+}
+
+export async function isFollowingUser(userId: string) {
+    try {
+        const token = localStorage.getItem('token');
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`${BASE_URL}/api/users/${userId}/is-following`, {
+            headers
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error checking follow status:', error);
+        throw error;
+    }
+}
+
+export async function fetchFeedPosts(feedType = 'all', page = 1) {
+    try {
+        const token = localStorage.getItem('token');
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`${BASE_URL}/posts?feed=${feedType}&page=${page}`, {
+            headers
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        return response.status === 204 ? null : await response.json();
+    } catch (error) {
+        console.error('Error fetching feed:', error);
         throw error;
     }
 }

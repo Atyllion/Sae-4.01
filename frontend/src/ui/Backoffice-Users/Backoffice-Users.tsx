@@ -34,6 +34,15 @@ export default function BackofficeUsers() {
     return (
         <div className="flex flex-col gap-4 px-4 sm:px-6 lg:px-8">
             <div className='flex flex-col gap-4 justify-center items-center m-5'>
+
+                {/*retour à la page d'accueil*/}
+                <button
+                    onClick={() => window.history.back()}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded mt-4 md:mt-0 self-start mb-4"
+                >
+                    Retour
+                </button>
+
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 max-w-sm text-center text-fg">
                     Liste des utilisateurs
                 </h1>
