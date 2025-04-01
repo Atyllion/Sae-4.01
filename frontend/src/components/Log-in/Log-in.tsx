@@ -11,7 +11,6 @@ export default function Login() {
 
     useEffect(() => {
         fetchUsers().then((users) => {
-            console.log('Users:', users);
             if (users && users.length > 0) {
                 setUser(users[0]); // Set the first user or modify as needed
             }

@@ -16,28 +16,39 @@ export default function LogInForm() {
     console.log('Password:', password);
 
     try {
-        const response = await loginUser({ email, password });
+      const response = await loginUser({ email, password });
 
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Token:', data.token);
-            setSuccess('Login successful!');
-            localStorage.setItem('token', data.token);
-            window.location.href = '/';
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Token:', data.token);
+        setSuccess('Login successful!');
+        localStorage.setItem('token', data.token);
+        window.location.href = '/';
+      } else {
+        const errorData = await response.json();
+        if (errorData.error) {
+          setError(errorData.error);
+        } else if (errorData.message) {
+          setError(errorData.message);
+        } else if (response.status === 401) {
+          setError('Invalid email or password');
+        } else if (response.status === 403) {
+          setError('Account is banned or access denied');
         } else {
-            const errorData = await response.json();
-            setError(errorData.error || 'Login failed');
+          setError(`Login failed with status: ${response.status}`);
         }
+        console.error('Login error details:', errorData);
+      }
     } catch (err) {
-        setError('An error occurred while logging in');
-        console.error('Error logging in:', err);
+      setError(`${err instanceof Error ? err.message : 'Unknown error'}`);
+      console.error('Error logging in:', err);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4 rounded-md w-full">
-      {error && <p className="text-red-500">{error}</p>}
-      {success && <p className="text-green-500">{success}</p>}
+      {error && <p className="text-red-500 text-center">{error}</p>}
+      {success && <p className="text-green-500 text-center">{success}</p>}
       <label className="flex flex-col">
         Email
         <input
