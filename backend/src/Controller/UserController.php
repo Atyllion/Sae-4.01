@@ -75,8 +75,9 @@ class UserController extends AbstractController
             'id' => $user->getId(),
             'username' => $user->getUsername(),
             'isVerified' => $user->isVerified(),
+            'bio' => $user->getBio(),
+            'localization' => $user->getLocalization(),
             'isBanned' => $user->isBanned(),
-            // N'incluez pas d'informations sensibles comme l'email complet, les rôles, etc.
         ];
 
         return $this->json($response);

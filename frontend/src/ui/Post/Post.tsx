@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchUserToken } from '../../loader/loader';
+import { fetchUserToken, fetchUserById } from '../../loader/loader';
 import { deletePostById } from '../../loader/loader';
 import FollowButton from '../Follow-Button/FollowButton';
 
@@ -8,13 +8,17 @@ import FollowButton from '../Follow-Button/FollowButton';
 import PostInteraction from '../Post-Interactions/Post-Interaction';
 import PostDeleteConfirmation from '../Post-Delete-Confirmation/Post-Delete-Confirmation';
 
-export default function Post({ content, created_at, id, user }: { content: string; created_at: string; id: string; user: { id: number; username: string } }) {
+export default function Post({ content, created_at, id, user }: { content: string; created_at: string; id: string; user: { id: number; username: string; isBanned?: boolean } }) {
 
     // Savoir si les posts appartiennent à l'utilisateur actuellement connecté
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);
     const [isAuthor, setIsAuthor] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
+    // Récupération du statut de bannissement s'il n'est pas déjà fourni
+    const [userBanned, setUserBanned] = useState<boolean>(user.isBanned || false);
+
+    //
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -33,6 +37,19 @@ export default function Post({ content, created_at, id, user }: { content: strin
                 });
         }
     }, []);
+
+    // Si le statut de bannissement n'est pas fourni dans les props, le récupérer depuis l'API
+    useEffect(() => {
+        if (user.isBanned === undefined) {
+            fetchUserById(String(user.id))
+                .then(userData => {
+                    setUserBanned(userData.isBanned || false);
+                })
+                .catch(error => {
+                    console.error('Error fetching user ban status:', error);
+                });
+        }
+    }, [user.id, user.isBanned]);
 
     // Vérifie si l'utilisateur actuel est l'auteur du post
     useEffect(() => {
@@ -65,19 +82,28 @@ export default function Post({ content, created_at, id, user }: { content: strin
                 </div>
             }
 
-            <div className="flex justify-between items-center">
-                <div>
-                    {isAuthor ? (
-                        <Link to="/profil" className='flex flex-row items-center gap-4 w-fit'>
-                            <p className='text-bg font-bold text-lg w-fit py-2 hover:text-indigo-500 transition-colors' title='Votre Profil'>{user?.username || 'Unknown User'}</p>
-                        </Link>
-                    ) : (
-                        <Link to={`/user/${user.id}`} className='flex flex-row items-center gap-4 w-fit'>
-                            <p className='text-bg font-bold text-lg w-fit py-2 hover:text-blue-500 transition-colors' title={`Visiter le profil de ${user.username}`}>{user?.username || 'Unknown User'}</p>
-                        </Link>
-                    )}
+            {/* Affichage du badge "Compte bloqué" pour les utilisateurs bannis */}
+            {userBanned && (
+                <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-2">
+                    <p className="font-bold">Compte bloqué</p>
                 </div>
-            </div>
+            )}
+
+            {!userBanned &&
+                <div className="flex justify-between items-center">
+                    <div>
+                        {isAuthor ? (
+                            <Link to="/profil" className='flex flex-row items-center gap-4 w-fit'>
+                                <p className='text-bg font-bold text-lg w-fit py-2 hover:text-indigo-500 transition-colors' title='Votre Profil'>{user?.username || 'Unknown User'}</p>
+                            </Link>
+                        ) : (
+                            <Link to={`/user/${user.id}`} className='flex flex-row items-center gap-4 w-fit'>
+                                <p className='text-bg font-bold text-lg w-fit py-2 hover:text-blue-500 transition-colors' title={`Visiter le profil de ${user.username}`}>{user?.username || 'Unknown User'}</p>
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            }
 
             {/* Contenue du post */}
             <p className='text-sm text-gray-800 leading-relaxed break-words md:text-base md:leading-loose'>{content}</p>
@@ -98,8 +124,8 @@ export default function Post({ content, created_at, id, user }: { content: strin
                 })()}
             </p>
 
-            {/* Composant d'interaction du post */}
-            <PostInteraction postId={id} />
+            {/* Composant d'interaction du post - Ne pas afficher si l'utilisateur est banni */}
+            {!userBanned && <PostInteraction postId={id} />}
         </li>
     );
 }

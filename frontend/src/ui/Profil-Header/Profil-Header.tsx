@@ -9,6 +9,8 @@ interface ProfileHeaderProps {
         id: string;
         email?: string;
         isVerified?: boolean;
+        bio?: string;
+        localization?: string;
     } | null;
     isCurrentUser: boolean;
     loading: boolean;
@@ -32,6 +34,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             </div>
         );
     }
+    
+    console.log('userData', userData);
 
     return (
         <div className='flex flex-col gap-4 bg-white rounded-lg shadow-md items-start'>
@@ -48,10 +52,30 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                         {/* Image de profil */}
                         <ProfilPicture />
 
-                        {/* Nom de l'utilisateur */}
-                        <h1 className="text-xl text-bg sm:text-2xl font-bold text-left md:text-center">
-                            {isCurrentUser ? `Mon profil (${userData.username})` : `Profil de ${userData.username}`}
-                        </h1>
+                        {/* Informations de l'utilisateur */}
+                        <div className="flex flex-col items-center md:items-start">
+                            {/* Nom de l'utilisateur */}
+                            <h1 className="text-xl text-bg sm:text-2xl font-bold text-left md:text-center">
+                                {isCurrentUser ? `Mon profil (${userData.username})` : `Profil de ${userData.username}`}
+                            </h1>
+                            
+                            {/* Bio de l'utilisateur */}
+                            <div className="text-base text-gray-600 sm:text-lg mt-1 max-w-md text-center md:text-left">
+                                {userData.bio ? userData.bio : isCurrentUser ? "Ajoutez une bio pour vous présenter" : "Aucune bio disponible"}
+                            </div>
+                            
+                            {/* Localisation de l'utilisateur */}
+                            <div className="text-sm text-gray-500 sm:text-base mt-1">
+                                <span className="inline-flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    {userData.localization ? userData.localization : isCurrentUser ? "Ajoutez votre localisation" : "Aucune localisation disponible"}
+                                </span>
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Bouton d'abonnement */}

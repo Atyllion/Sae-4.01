@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchUserToken, fetchUserById } from '../../loader/loader';
 import Feed from '../Feed/Feed';
-import { useParams } from 'react-router-dom';
+import { data, useParams } from 'react-router-dom';
 import ProfileHeader from '../../ui/Profil-Header/Profil-Header';
 import BackButton from '../../ui/Button-Back/Button-Back';
 
@@ -12,7 +12,11 @@ export default function Profil() {
         id: string;
         email?: string;
         isVerified?: boolean;
+        bio?: string;
+        localization?: string;
     } | null>(null);
+    const [localisation, getLocalization] = useState<string | null>(null);
+    const [bio, getBio] = useState<string | null>(null);
     const [isCurrentUser, setIsCurrentUser] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -43,6 +47,8 @@ export default function Profil() {
                         email: data.user.email,
                         id: data.user.id,
                         isVerified: data.user.isVerified,
+                        bio: data.user.bio,
+                        localization: data.user.localization,
                     });
                     setIsCurrentUser(true);
                     setLoading(false);
@@ -53,6 +59,7 @@ export default function Profil() {
                     setUserData(null);
                     setLoading(false);
                 });
+                
         } else if (userId) {
             // Profil d'un autre utilisateur
             fetchUserById(userId)
@@ -61,6 +68,8 @@ export default function Profil() {
                         username: data.username,
                         id: data.id,
                         isVerified: data.isVerified,
+                        bio: data.bio,
+                        localization: data.localization,
                     });
                     
                     // Vérifier si c'est l'utilisateur courant
@@ -73,10 +82,20 @@ export default function Profil() {
                     if (tokenData.user && tokenData.user.id == userId) {
                         setIsCurrentUser(true);
                         
-                        // Compléter avec les données complètes de l'utilisateur
+                        // Set individual state values instead of updating the whole object
+                        if (tokenData.user.bio) {
+                            getBio(tokenData.user.bio);
+                        }
+                        
+                        if (tokenData.user.localization) {
+                            getLocalization(tokenData.user.localization);
+                        }
+                        
+                        // Update remaining userData properties
                         setUserData(prevData => ({
                             ...prevData,
                             email: tokenData.user.email,
+                            isVerified: tokenData.user.isVerified
                         }));
                     }
                     setLoading(false);

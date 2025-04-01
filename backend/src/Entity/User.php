@@ -34,7 +34,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $tokens;
 
     #[ORM\Column(type: 'boolean')]
-    private bool $isVerified = false; // Par défaut, l'utilisateur n'est pas vérifié
+    private bool $isVerified = false;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Likes::class, orphanRemoval: true)]
     private Collection $likes;
@@ -46,7 +46,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $following;
 
     #[ORM\Column(type: 'boolean')]
-    private bool $isBan = false; // Par défaut, l'utilisateur n'est pas banni
+    private bool $isBan = false;
+
+    #[ORM\Column(type: 'string',length: 200,nullable: true)]
+    private ?string $bio = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $localization = null;
 
     public function __construct()
     {
@@ -230,5 +236,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function isBanned(): bool
     {
         return $this->isBan;
+    }
+
+    public function getBio(): ?string
+    {
+        return $this->bio;
+    }
+
+    public function setBio(?string $bio): static
+    {
+        $this->bio = $bio;
+
+        return $this;
+    }
+
+    /**
+     * Get the user's localization
+     */
+    public function getLocalization(): ?string
+    {
+        return $this->localization;
+    }
+
+    /**
+     * Set the user's localization
+     */
+    public function setLocalization(?string $localization): static
+    {
+        $this->localization = $localization;
+
+        return $this;
     }
 }

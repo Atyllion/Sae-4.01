@@ -10,6 +10,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+use App\Repository\UserRepository;
 use App\Repository\PostRepository;
 use App\Service\PostService;
 use App\Dto\Payload\CreatePostPayload;
@@ -22,7 +23,7 @@ class PostController extends AbstractController
     // Example:
     // - `/posts?page=2&count=5` to get the second page with 5 posts per page.
     // - `/posts?page=3&count=10` to get the third page with 10 posts per page.
-    
+
 
     // Récupération de tous les posts
     #[Route('/posts', name: 'posts.get', methods: ['GET'])]
@@ -38,14 +39,22 @@ class PostController extends AbstractController
 
         $posts = [];
         foreach ($paginator as $post) {
+            $user = $post->getUser();
+            $isBanned = $user->isBanned();
+
             $posts[] = [
                 'id' => $post->getId(),
-                'content' => $post->getContent(),
+                'content' => $isBanned
+                    ? "Ce compte a été bloqué pour non respect des conditions d'utilisation"
+                    : $post->getContent(),
                 'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
                 'user' => [
-                    'id' => $post->getUser()->getId(),
-                    'username' => $post->getUser()->getUsername(),
+                    'id' => $user->getId(),
+                    'username' => $user->getUsername(),
+                    'isBanned' => $isBanned, // Ajout de l'information de bannissement
                 ],
+                // Ne pas inclure les likes si l'utilisateur est banni
+                'likesCount' => $isBanned ? 0 : count($post->getLikes()),
             ];
         }
 
@@ -69,14 +78,22 @@ class PostController extends AbstractController
             return new JsonResponse(['error' => 'Post not found'], Response::HTTP_NOT_FOUND);
         }
 
+        $user = $post->getUser();
+        $isBanned = $user->isBanned();
+
         $response = [
             'id' => $post->getId(),
-            'content' => $post->getContent(),
+            'content' => $isBanned
+                ? ""
+                : $post->getContent(),
             'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
             'user' => [
-                'id' => $post->getUser()->getId(),
-                'username' => $post->getUser()->getUsername(),
+                'id' => $user->getId(),
+                'username' => $user->getUsername(),
+                'isBanned' => $isBanned, // Ajout de l'information de bannissement
             ],
+            // Ne pas inclure les likes si l'utilisateur est banni
+            'likesCount' => $isBanned ? 0 : count($post->getLikes()),
         ];
 
         return $this->json($response);
@@ -100,10 +117,14 @@ class PostController extends AbstractController
 
     // Récupération des posts d'un utilisateur
     #[Route('/posts/user/{userId}', name: 'posts.user', methods: ['GET'])]
-    public function userPosts(Request $request, int $userId, PostRepository $postRepository): JsonResponse
+    public function userPosts(Request $request, int $userId, PostRepository $postRepository, UserRepository $userRepository): JsonResponse
     {
         $count = $request->query->getInt('count', 5);
         $page = $request->query->getInt('page', 1);
+
+        // Récupérer l'utilisateur pour vérifier s'il est banni
+        $userObject = $userRepository->find($userId);
+        $isUserBanned = $userObject ? $userObject->isBanned() : false;
 
         $paginator = $postRepository->paginateByUserOrderedByLatest($userId, $page, $count);
         $totalPostsCount = $paginator->count();
@@ -114,12 +135,17 @@ class PostController extends AbstractController
         foreach ($paginator as $post) {
             $posts[] = [
                 'id' => $post->getId(),
-                'content' => $post->getContent(),
+                'content' => $isUserBanned 
+                    ? ""
+                    : $post->getContent(),
                 'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
                 'user' => [
                     'id' => $post->getUser()->getId(),
                     'username' => $post->getUser()->getUsername(),
+                    'isBanned' => $isUserBanned,
                 ],
+                // Ne pas inclure les likes si l'utilisateur est banni
+                'likesCount' => $isUserBanned ? 0 : count($post->getLikes()),
             ];
         }
 
