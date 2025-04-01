@@ -3,6 +3,7 @@ import { fetchUserToken, fetchUserById } from '../../loader/loader';
 import Feed from '../Feed/Feed';
 import { useParams } from 'react-router-dom';
 import ProfileHeader from '../../ui/Profil-Header/Profil-Header';
+import BackButton from '../../ui/Button-Back/Button-Back';
 
 export default function Profil() {
     const { userId } = useParams();
@@ -111,12 +112,9 @@ export default function Profil() {
     return (
         <div className=''>
             <div className="p-6 rounded-lg shadow-md">
-                <button
-                    onClick={() => window.history.back()}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded mt-4 md:mt-0 self-start mb-4"
-                >
-                    Retour
-                </button>
+
+                {/* Bouton de retour */}
+                <BackButton />
 
                 {/* Header du profil */}
                 <ProfileHeader

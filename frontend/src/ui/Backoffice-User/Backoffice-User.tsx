@@ -1,18 +1,55 @@
 // loader
-import { fetchUsers } from '../../loader/loader';
+import { fetchUsers, banUser, unbanUser, fetchUserById, fetchUserToken } from '../../loader/loader';
 
 // react
 import React from 'react';
 
 // style
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { patchUserById } from '../../loader/loader';
 
-export default function BackofficeUser({ user }: { user: { id: string; email: string; username: string } }) {
+export default function BackofficeUser({ user }: { user: { id: string; email: string; username: string; isBanned?: boolean } }) {
 
     const [username, setUsername] = useState(user.username);
     const [email, setEmail] = useState(user.email);
     const [error, setError] = useState<string | null>(null);
+    const [isBanned, setIsBanned] = useState(user.isBanned || false);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+    {/* récupère le token pour savoir quel est l'utilisateur */ }
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            fetchUserToken()
+                .then((response) => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Failed to fetch user data');
+                })
+                .then((data) => {
+                    setCurrentUserId(data.user.id); // Stocke l'ID de l'utilisateur actuellement connecté
+                })
+                .catch((error) => {
+                    console.error('Error fetching user data:', error.message);
+                });
+        }
+    }, []);
+
+    useEffect(() => {
+        const fetchBanStatus = async () => {
+            try {
+                const userData = await fetchUserById(user.id);
+                setIsBanned(userData.isBanned || false);
+            } catch (err) {
+                console.error('Error fetching user ban status:', err);
+                setError('Erreur lors de la récupération du statut de l\'utilisateur.');
+            }
+        };
+
+        fetchBanStatus();
+    }, [user.id]);
 
     const handleSave = async () => {
         // Fetch the latest user data from the backend to compare
@@ -60,6 +97,34 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
         }
     };
 
+    const handleBanUser = async () => {
+        setIsProcessing(true);
+        try {
+            await banUser(user.id);
+            setIsBanned(true);
+            alert(`L'utilisateur ${user.username} a été banni avec succès.`);
+        } catch (err) {
+            console.error('Erreur lors du bannissement de l\'utilisateur :', err);
+            setError('Une erreur est survenue lors du bannissement de l\'utilisateur.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleUnbanUser = async () => {
+        setIsProcessing(true);
+        try {
+            await unbanUser(user.id);
+            setIsBanned(false);
+            alert(`L'utilisateur ${user.username} a été débanni avec succès.`);
+        } catch (err) {
+            console.error('Erreur lors du débannissement de l\'utilisateur :', err);
+            setError('Une erreur est survenue lors du débannissement de l\'utilisateur.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     return (
         <li className="w-full max-w-md border border-gray-300 rounded-lg shadow-md bg-gray-50 flex flex-col gap-6">
 
@@ -96,16 +161,48 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
                     />
                 </div>
 
-                {/* bouton de submit */}
-                <div className="mt-6 flex justify-center">
-                    <button
-                        id='save__button'
-                        onClick={handleSave}
-                        type="submit"
-                        className="padding bg-indigo-600 text-white font-medium p-4 rounded-md shadow hover:bg-indigo-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75"
-                    >
-                        Enregistrer les modifications
-                    </button>
+                <div className='flex flex-col gap-4 w-full'>
+                    {/* bouton de submit */}
+                    <div className="flex justify-center w-full">
+                        <button
+                            id='save__button'
+                            onClick={handleSave}
+                            type="submit"
+                            className="padding bg-indigo-600 text-white font-medium p-4 rounded-md shadow hover:bg-indigo-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 w-full"
+                        >
+                            Enregistrer les modifications
+                        </button>
+                    </div>
+
+                    {/* Display error messages */}
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span className="block sm:inline">{error}</span>
+                        </div>
+                    )}
+
+                    {/* Boutons de ban/unban */}
+                    <div className="flex flex-col justify-center w-full">
+                        {String(user.id) !== String(currentUserId) && (
+                            <button
+                                id={isBanned ? "unban__button" : "ban__button"}
+                                onClick={isBanned ? handleUnbanUser : handleBanUser}
+                                disabled={isProcessing}
+                                className={`padding text-white font-medium p-3 rounded-md shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-opacity-75 disabled:opacity-50 w-full ${
+                                    isBanned 
+                                        ? "bg-green-600 hover:bg-green-700 focus:ring-green-400" 
+                                        : "bg-red-600 hover:bg-red-700 focus:ring-red-400"
+                                }`}
+                            >
+                                {isProcessing 
+                                    ? 'En cours...' 
+                                    : isBanned 
+                                        ? 'Débannir l\'utilisateur' 
+                                        : 'Bannir l\'utilisateur'
+                                }
+                            </button>
+                        )}
+                    </div>
                 </div>
 
             </div>

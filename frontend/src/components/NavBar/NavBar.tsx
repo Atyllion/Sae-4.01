@@ -1,7 +1,7 @@
 import React from 'react';
 
 // UI
-import NavBarProfile from '../../ui/NavBar-Profile/NavBar-Profile';
+import NavBarProfile from '../../ui/NavBar-Profil/NavBar-Profil';
 import NavBarHome from '../../ui/NavBar-Home/NavBar-Home';
 import NavBarBackoffice from '../../ui/NavBar-Backoffice/NavBar-Backoffice';
 
