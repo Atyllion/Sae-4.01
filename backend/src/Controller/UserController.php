@@ -83,7 +83,7 @@ class UserController extends AbstractController
         return $this->json($response);
     }
 
-    // modification d'un utilisateur (TODO : uniquement pour les admins)
+    // modification d'un utilisateur
     #[Route('/updateuser/{id}', name: 'user.patch', methods: ['PATCH'])]
     public function patch(
         Request $request,

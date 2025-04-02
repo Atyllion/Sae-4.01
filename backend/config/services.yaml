@@ -23,5 +23,9 @@ services:
     # Allow App\Entity\User to be autowired
     App\Entity\User: ~
 
+    App\Service\FileUploadService:
+        arguments:
+            $targetDirectory: '%kernel.project_dir%/public/uploads'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

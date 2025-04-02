@@ -54,6 +54,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $localization = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $profilePicturePath = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $bannerPicturePath = null;
+
     public function __construct()
     {
         $this->tokens = new ArrayCollection();
@@ -264,6 +270,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLocalization(?string $localization): static
     {
         $this->localization = $localization;
+
+        return $this;
+    }
+
+    public function getProfilePicturePath(): ?string
+    {
+        return $this->profilePicturePath;
+    }
+
+    public function setProfilePicturePath(?string $profilePicturePath): self
+    {
+        $this->profilePicturePath = $profilePicturePath;
+
+        return $this;
+    }
+
+    public function getBannerPicturePath(): ?string
+    {
+        return $this->bannerPicturePath;
+    }
+
+    public function setBannerPicturePath(?string $bannerPicturePath): self
+    {
+        $this->bannerPicturePath = $bannerPicturePath;
 
         return $this;
     }
