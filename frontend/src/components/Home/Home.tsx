@@ -4,6 +4,7 @@ import { fetchUserToken } from '../../loader/loader';
 
 // importer UI
 import NewPost from '../../ui/NewPost/NewPost';
+import Param from '../Param/Param';
 
 // importer Component
 import Feed from '../Feed/Feed';
@@ -87,6 +88,18 @@ export default function Home() {
               </div>
             </>
           }
+        />
+
+        {/* Page Paramètres */}
+        <Route 
+          path="/parametres"
+          element={
+            localStorage.getItem('token') ? (
+              <Param />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
         />
 
         {/* Pages de connexion et d'inscription */}

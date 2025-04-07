@@ -126,16 +126,18 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
     };
 
     return (
-        <li className="w-full max-w-md border border-gray-300 rounded-lg shadow-md bg-gray-50 flex flex-col gap-6">
+        <li className="w-full max-w-md h-full border border-gray-300 rounded-lg shadow-md bg-gray-50 flex flex-col gap-6">
 
             <div className="flex flex-col gap-6 p-4 m-2">
 
                 {/* nom d'utilisateur + input */}
                 <div className="flex flex-col justify-center items-start w-full mb-4">
+
                     <div className="flex flex-row items-center gap-4">
                         <h3 className="text-lg font-bold text-gray-600">Utilisateur :</h3>
-                        <p className="text-xl text-gray-800">{user.username}</p>
+                        <p className="text-xl text-gray-800 max-w-45 truncate" title={user.username}>{user.username}</p>
                     </div>
+
                     <input
                         id='username__input'
                         type="text"
@@ -148,10 +150,17 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
 
                 {/* e-mail + input */}
                 <div className="flex flex-col justify-center items-start w-full mb-4">
+
                     <div className="flex flex-row items-center gap-4">
                         <h3 className="text-lg font-bold text-gray-600">E-mail :</h3>
-                        <p className="text-xl text-gray-800">{user.email}</p>
+                        <p 
+                            className="text-xl text-gray-800 max-w-45 truncate"
+                            title={user.email}
+                        >
+                            {user.email}
+                        </p>
                     </div>
+
                     <input
                         id='email__input'
                         type="email"
@@ -174,7 +183,7 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
                         </button>
                     </div>
 
-                    {/* Display error messages */}
+                    {/* message d'erreur */}
                     {error && (
                         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                             <span className="block sm:inline">{error}</span>

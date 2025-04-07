@@ -59,6 +59,7 @@ class RegisterTokenController extends AbstractController
     public function verifyToken(Request $request, UserService $userService): JsonResponse
     {
         $tokenValue = str_replace('Bearer ', '', $request->headers->get('Authorization'));
+
         if (!$tokenValue) {
             return new JsonResponse(['error' => 'Token is required'], Response::HTTP_BAD_REQUEST);
         }
@@ -82,6 +83,8 @@ class RegisterTokenController extends AbstractController
                     'localization' => $token->getUser()->getLocalization(),
                     'bio' => $token->getUser()->getBio(),
                     'isBanned' => $token->getUser()->isBanned(),
+                    'profilePicturePath' => $token->getUser()->getProfilePicturePath(),
+                    'bannerPicturePath' => $token->getUser()->getBannerPicturePath(),
                 ],
                 'createdAt' => $token->getCreatedAt()->format('Y-m-d H:i:s'),
                 'expiresAt' => $token->getExpiresAt()->format('Y-m-d H:i:s'),

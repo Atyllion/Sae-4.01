@@ -4,6 +4,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    Profil_directory: '%kernel.project_dir%/public/uploads'
+    Banner_directory: '%kernel.project_dir%/public/uploads'
+
 
 services:
     # default configuration for services in *this* file
@@ -25,7 +28,12 @@ services:
 
     App\Service\FileUploadService:
         arguments:
-            $targetDirectory: '%kernel.project_dir%/public/uploads'
+            $profilePicturesDirectory: '%Profil_directory%'
+            $bannerPicturesDirectory: '%Banner_directory%'
+    
+    App\EventListener\CorsListener:
+        tags:
+            - { name: kernel.event_subscriber }
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

@@ -39,14 +39,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Likes::class, orphanRemoval: true)]
     private Collection $likes;
 
-    #[ORM\OneToMany(mappedBy: 'following', targetEntity: Subscription::class, orphanRemoval: true)]
-    private Collection $followers;
-
     #[ORM\OneToMany(mappedBy: 'follower', targetEntity: Subscription::class, orphanRemoval: true)]
     private Collection $following;
 
     #[ORM\Column(type: 'boolean')]
-    private bool $isBan = false;
+    private bool $isBanned = false;
 
     #[ORM\Column(type: 'string',length: 200,nullable: true)]
     private ?string $bio = null;
@@ -64,7 +61,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->tokens = new ArrayCollection();
         $this->likes = new ArrayCollection();
-        $this->followers = new ArrayCollection();
         $this->following = new ArrayCollection();
     }
 
@@ -227,21 +223,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return false;
     }
 
-    public function setIsBanned(bool $isBan): static
+    public function setIsBanned(bool $isBanned): static
     {
-        $this->isBan = $isBan;
-
+        $this->isBanned = $isBanned;
         return $this;
     }
-
+    
     public function getIsBanned(): bool
     {
-        return $this->isBan;
+        return $this->isBanned;
     }
     
     public function isBanned(): bool
     {
-        return $this->isBan;
+        return $this->isBanned;
     }
 
     public function getBio(): ?string

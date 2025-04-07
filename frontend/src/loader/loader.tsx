@@ -107,16 +107,17 @@ export async function deletePostById(postId: string) {
 export async function fetchUserPosts(userId: string, page = 1) {
     try {
         const token = localStorage.getItem('token');
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json'
+        };
 
-        if (!token) {
-            throw new Error('No token found. Please log in to view your posts.');
+        // Add token to headers if available, but don't require it
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
         }
 
         const response = await fetch(`${BASE_URL}/posts/user/${userId}?page=${page}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+            headers
         });
 
         if (!response.ok) {
@@ -537,6 +538,145 @@ export async function unbanUser(userId: string) {
         return await response.json();
     } catch (error) {
         console.error('Error unbanning user:', error);
+        throw error;
+    }
+}
+
+// Fonction utilitaire pour récupérer les images de profil sans authentification
+export async function getPublicProfilePicture(userId: string) {
+    try {
+        const response = await fetch(`${BASE_URL}/user/profile/${userId}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching public profile picture:', error);
+        return null;
+    }
+}
+
+// Fonction utilitaire pour construire l'URL complète d'une image
+export function getImageUrl(path: string | null) {
+    if (!path) return "/assets/profile-default.svg";
+    return `${BASE_URL}/uploads/${path}`;
+}
+
+// MISE A JOUR DES INFOS UTILISATEUR
+
+// Mettre à jour les détails du profil (bio, localisation)
+export async function updateUserDetails(detailsData: { bio?: string; localization?: string }) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        
+        const response = await fetch(`${BASE_URL}/user-update-details`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(detailsData)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update profile details');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating profile details:', error);
+        throw error;
+    }
+}
+
+// Uploader une photo de profil
+export async function uploadProfilePicture(file: File) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        
+        // Check file size before uploading (limit to 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            throw new Error('File size exceeds 5MB limit');
+        }
+        
+        const formData = new FormData();
+        formData.append('profilePicture', file);
+        
+        console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type);
+        
+        // Ne pas définir l'en-tête Content-Type - le navigateur le fera automatiquement avec le boundary
+        const response = await fetch(`${BASE_URL}/user-upload-profile-picture`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+                // Ne pas inclure Content-Type ici
+            },
+            credentials: 'include', // Inclure les cookies si nécessaire
+            body: formData
+        });
+        
+        if (!response.ok) {
+            // Handle specific error for permissions
+            if (response.status === 403) {
+                console.error('Permission error detected on server');
+                throw new Error('Upload failed: The server does not have permission to store this file');
+            }
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Failed to upload profile picture');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        // Log different types of errors for debugging
+        if (error instanceof Error) {
+            if (error.message.includes('Permission denied') || error.message.includes('permission')) {
+                console.error('Server permission error: Please contact administrator to verify upload directory permissions');
+            } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                console.error('Network error: Check your internet connection');
+            } else {
+                console.error('Error uploading profile picture:', error.message);
+            }
+        } else {
+            console.error('Unknown error uploading profile picture');
+        }
+        throw error;
+    }
+}
+
+// Uploader une bannière
+export async function uploadBannerPicture(file: File) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No authentication token found');
+        }
+        
+        const formData = new FormData();
+        formData.append('bannerPicture', file);
+        
+        const response = await fetch(`${BASE_URL}/user-upload-banner-picture`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to upload banner picture');
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error uploading banner picture:', error);
         throw error;
     }
 }

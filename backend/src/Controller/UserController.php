@@ -14,6 +14,7 @@ use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use Symfony\Component\Mime\Email;
 
 use App\Security\EmailVerifier;
+use App\Service\FileUploadService;
 use App\Repository\UserRepository;
 use App\Service\UserService;
 use App\Entity\User;
@@ -24,6 +25,7 @@ use App\Form\RegistrationFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class UserController extends AbstractController
 {
@@ -78,6 +80,28 @@ class UserController extends AbstractController
             'bio' => $user->getBio(),
             'localization' => $user->getLocalization(),
             'isBanned' => $user->isBanned(),
+            'profilePicturePath' => $user->getProfilePicturePath(),  // Juste le nom du fichier
+            'bannerPicturePath' => $user->getBannerPicturePath(),  // Juste le nom du fichier
+        ];
+
+        return $this->json($response);
+    }
+
+    // Accès public aux images des utilisateurs (pas besoin d'authentification)
+    #[Route('/user/profile/{id}/picture', name: 'user.public.profile.picture', methods: ['GET'])]
+    public function getPublicProfilePicture(
+        UserRepository $userRepository,
+        int $id
+    ): JsonResponse {
+        $user = $userRepository->find($id);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $response = [
+            'profilePicturePath' => $user->getProfilePicturePath(),
+            'bannerPicturePath' => $user->getBannerPicturePath(),
         ];
 
         return $this->json($response);
@@ -255,5 +279,130 @@ class UserController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['message' => 'User unbanned successfully'], Response::HTTP_OK);
+    }
+
+    // MODIFICATION DU PROFIL DE L'UTILISATEUR //
+
+    // update des informations de l'utilisateur
+    #[Route('/user-update-details', name: 'user.update_details', methods: ['POST'])]
+    public function updateDetails(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        // Récupérer l'utilisateur connecté
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        // Mise à jour des détails supplémentaires
+        if (isset($data['bio'])) {
+            $user->setBio($data['bio']);
+        }
+
+        if (isset($data['localization'])) {
+            $user->setLocalization($data['localization']);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'message' => 'Profile details updated successfully',
+            'user' => [
+                'id' => $user->getId(),
+                'bio' => $user->getBio(),
+                'localization' => $user->getLocalization()
+            ]
+        ]);
+    }
+
+    // update de la photo de profil de l'utilisateur
+    #[Route('/user-upload-profile-picture', name: 'user.upload_profile_picture', methods: ['POST'])]
+    public function uploadProfilePicture(
+        Request $request,
+        FileUploadService $fileUploader,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        // Récupérer l'utilisateur connecté
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        /** @var UploadedFile $profilePictureFile */
+        $profilePictureFile = $request->files->get('profilePicture');
+
+        if (!$profilePictureFile) {
+            return new JsonResponse(['error' => 'No file uploaded'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Valider le type de fichier
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!in_array($profilePictureFile->getMimeType(), $allowedMimeTypes)) {
+            return new JsonResponse(['error' => 'Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            // Upload du fichier et récupération du nom de fichier uniquement
+            $fileName = $fileUploader->uploadProfilePicture($profilePictureFile);
+
+            // Mise à jour de l'utilisateur avec uniquement le nom du fichier
+            $user->setProfilePicturePath($fileName);
+
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'message' => 'Profile picture uploaded successfully',
+                'fileName' => $fileName,
+                'path' => '/assets/profil_pic/' . $fileName  // Chemin relatif pour l'affichage
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // update de la banniere de l'utilisateur
+    #[Route('/user-upload-banner-picture', name: 'user.upload_banner_picture', methods: ['POST'])]
+    public function uploadBannerPicture(
+        Request $request,
+        FileUploadService $fileUploader,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        // Récupérer l'utilisateur connecté
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        /** @var UploadedFile $bannerPictureFile */
+        $bannerPictureFile = $request->files->get('bannerPicture');
+
+        if (!$bannerPictureFile) {
+            return new JsonResponse(['error' => 'No file uploaded'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Valider le type de fichier
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!in_array($bannerPictureFile->getMimeType(), $allowedMimeTypes)) {
+            return new JsonResponse(['error' => 'Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $fileName = $fileUploader->uploadBannerPicture($bannerPictureFile);
+
+            $user->setBannerPicturePath($fileName);
+
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'message' => 'Banner picture uploaded successfully',
+                'fileName' => $fileName,
+                'path' => '/assets/banner_pic/' . $fileName  // Chemin relatif pour l'affichage
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchUserToken, fetchUserById } from '../../loader/loader';
-import { deletePostById } from '../../loader/loader';
+import { deletePostById, getPublicProfilePicture, getImageUrl } from '../../loader/loader';
 import FollowButton from '../Follow-Button/FollowButton';
+import ProfilPicture from '../Profil-Picture/Profil-Picture';
 
 // UI
 import PostInteraction from '../Post-Interactions/Post-Interaction';
@@ -14,11 +15,25 @@ export default function Post({ content, created_at, id, user }: { content: strin
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);
     const [isAuthor, setIsAuthor] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [profilePicture, setProfilePicture] = useState<string>("/assets/profile-default.svg");
 
     // Récupération du statut de bannissement s'il n'est pas déjà fourni
     const [userBanned, setUserBanned] = useState<boolean>(user.isBanned || false);
 
-    //
+    // Fonction pour récupérer l'image de profil de l'utilisateur
+    useEffect(() => {
+        const loadProfilePicture = async () => {
+            if (user) {
+                const userData = await getPublicProfilePicture(String(user.id));
+                if (userData && userData.profilePicturePath) {
+                    setProfilePicture(getImageUrl(userData.profilePicturePath));
+                }
+            }
+        };
+        
+        loadProfilePicture();
+    }, [user]);
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -89,15 +104,24 @@ export default function Post({ content, created_at, id, user }: { content: strin
                 </div>
             )}
 
+            {/* Si bannie alors pas de lien vers le profil */}
             {!userBanned &&
                 <div className="flex justify-between items-center">
                     <div>
                         {isAuthor ? (
                             <Link to="/profil" className='flex flex-row items-center gap-4 w-fit'>
+
+                                {/* Image de profil */}
+                                <ProfilPicture userId={user.id.toString()} />
+
                                 <p className='text-bg font-bold text-lg w-fit py-2 hover:text-indigo-500 transition-colors' title='Votre Profil'>{user?.username || 'Unknown User'}</p>
                             </Link>
                         ) : (
                             <Link to={`/user/${user.id}`} className='flex flex-row items-center gap-4 w-fit'>
+
+                                {/* Image de profil */}
+                                <ProfilPicture userId={user.id.toString()} />
+                                
                                 <p className='text-bg font-bold text-lg w-fit py-2 hover:text-blue-500 transition-colors' title={`Visiter le profil de ${user.username}`}>{user?.username || 'Unknown User'}</p>
                             </Link>
                         )}

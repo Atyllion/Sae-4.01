@@ -108,10 +108,12 @@ export default function Profil() {
         }
     }, [userId]);
 
+    // Vérification si l'utilisateur est connecté
     if (loading) {
         return <div className="text-center p-8">Chargement du profil utilisateur...</div>;
     }
 
+    // Message d'erreur
     if (error || !userData) {
         return (
             <div className="flex flex-col items-center justify-center p-8">

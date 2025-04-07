@@ -1,41 +1,68 @@
 @import "tailwindcss";
 
 :root {
-  /* primary token */
+  /* Primary color palette */
   --color-light: #f9f9f9;
   --color-dark: #1a1a1a;
-  --color-green: #00ff00;
-  --color-red: #ff0000;
-  --color-blue: #0000ff;
 
-  /* instagram Token */
-  --color-instagram-blue: #405DE6;
-  --color-instagram-purple: #5851DB;
-  --color-instagram-pink: #833AB4;
+  /* greens */
+  --color-green: #00dd77;
+  --color-green-light: #00ff7f;
+  --color-green-dark: #00b300;
 
-  /* sementic token */
+  /* reds */
+  --color-red: #ff3b30;
+  --color-red-light: #ff453a;
+  --color-red-dark: #c72c41;
+  
+  /* blues */
+  --color-blue: #007aff;
+  --color-blue-light: #5ac8fa;
+  --color-blue-dark: #0051ba;
+  
+  /* Extended color palette */
+  --color-primary: #4361ee;
+  --color-secondary: #7209b7;
+  --color-accent: #f72585;
+  --color-warning: #fb8500;
+  --color-success: #06d6a0;
+  --color-info: #3a86ff;
+  --color-error: #ef233c;
+  
+  /* Neutral colors */
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #171717;
+  
+  /* Semantic tokens - keep these as they are used */
   --color-fg: var(--color-light);
   --color-bg: var(--color-dark);
 }
 
 @theme .light {
-  --color-fg: var(--color-light);
-  --color-bg: var(--color-dark);
-}
-
-@theme .dark {
   --color-fg: var(--color-dark);
   --color-bg: var(--color-light);
 }
 
+@theme .dark {
+  --color-fg: var(--color-light);
+  --color-bg: var(--color-dark);
+}
+
 @layer base {
   .dark {
-    --color-fg: var(--color-dark);
-    --color-bg: var(--color-light);
+    --color-fg: var(--color-light);
+    --color-bg: var(--color-dark);
   }
 
   .light {
-    --color-fg: var(--color-light);
-    --color-bg: var(--color-dark);
+    --color-fg: var(--color-dark);
+    --color-bg: var(--color-light);
   }
 }

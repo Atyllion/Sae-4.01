@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { fetchUserToken } from '../../loader/loader';
 import DisconnectButton from '../Disconnect-Button/Disconnect-Button';
+import ProfilPicture from '../Profil-Picture/Profil-Picture';
 
 export default function NavBarProfil() {
     const [username, setUsername] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [profilePicture, setProfilePicture] = useState<string>("/assets/profile-default.svg");
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -17,13 +20,21 @@ export default function NavBarProfil() {
                 })
                 .then((data) => {
                     setUsername(data.user.username); // Affiche username de l'utilisateur dans la navbar
+                    setUserId(data.user.id); // Stocke l'ID de l'utilisateur
+                    
+                    // Récupère le chemin de la photo de profil si disponible
+                    if (data.user.profilePicturePath) {
+                        setProfilePicture(`http://localhost:8080/uploads/${data.user.profilePicturePath}`);
+                    }
                 })
                 .catch((error) => {
                     console.error('Error fetching user data:', error.message);
                     setUsername(null);
+                    setUserId(null);
                 });
         } else {
             setUsername(null);
+            setUserId(null);
         }
     }, []);
 
@@ -36,14 +47,32 @@ export default function NavBarProfil() {
             {username ? (
                 <li className="flex flex-row md:flex-col gap-4 items-center">
                     
-                    {/* Avatar */}
+                    {/* Avatar avec photo de profil personnalisée */}
                     <a
                         className="text-bg font-bold hover:text-primary transition-all duration-300 ease-in-out transform hover:scale-105"
                         href="/profil"
+                        title={`Accès au profil de ${username}`}
                     >
-                        <span className="from-primary to-bg bg-clip-text" title="Accès au profil" >
-                            Salut {username}
-                        </span>
+                        {userId ? (
+                            <div className="w-20 h-20 rounded-full overflow-hidden">
+                                <img
+                                    className="w-full h-full object-cover"
+                                    src={profilePicture}
+                                    alt={`Profil de ${username}`}
+                                    onError={(e) => {
+                                        // En cas d'erreur, utiliser l'image par défaut
+                                        e.currentTarget.onerror = null;
+                                        e.currentTarget.src = "/assets/profile-default.svg";
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <img
+                                className="max-w-10 max-h-10 rounded-full aspect-square"
+                                src="/assets/profile-default.svg" 
+                                alt={`Profil de ${username}`}
+                            />
+                        )}
                     </a>
 
                     {/* Déconnexion */}
