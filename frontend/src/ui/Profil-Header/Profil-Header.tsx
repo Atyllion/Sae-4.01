@@ -44,10 +44,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {/* Bannière de profil */}
             <ProfilBanner />
 
-            <div className='sm:p-6 md:items-start flex flex-col w-full items-center justify-between md:flex-row md:w-full'>
+            <div className='p-6 md:items-start flex flex-col w-full items-center justify-between md:flex-row md:w-full'>
 
                 {/* Informations de l'utilisateur */}
-                <div className=" flex flex-col gap-2 items-center md:items-start">
+                <div className=" flex flex-col gap-4 items-center md:items-start">
 
                     <div className='flex flex-col md:flex-row items-center md:justify-center gap-2'>
                         {/* Image de profil */}
@@ -60,7 +60,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     </div>
 
                     {/* Bio de l'utilisateur */}
-                    <div className="text-base italic text-gray-600 sm:text-lg max-w-md text-center md:text-left">
+                    <div className="text-base italic text-gray-600 sm:text-lg max-w-lg text-center md:text-left">
 
                         {userData.bio ? userData.bio : isCurrentUser ? "Ajoutez une bio pour vous présenter" : "Aucune bio disponible"}
 
@@ -78,9 +78,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                             {userData.localization ? userData.localization : isCurrentUser ? "Ajoutez votre localisation" : "Aucune localisation disponible"}
                         </span>
                     </div>
-
-                    {/* Bouton modification du profil */}
-                    {/* TODO */}
 
                     {/* Bouton d'abonnement */}
                     {!isCurrentUser && (

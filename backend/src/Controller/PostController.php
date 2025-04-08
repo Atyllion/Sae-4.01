@@ -180,7 +180,6 @@ class PostController extends AbstractController
     }
 
     // Création d'un post (avec ou sans médias)
-    // Création d'un post (avec ou sans médias)
     #[Route('/posts_create', name: 'posts.create', methods: ['POST'])]
     public function create(
         Request $request,
@@ -322,6 +321,159 @@ class PostController extends AbstractController
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // Modification d'un post
+    // Réparer la fonction update du contrôleur
+
+    // Modification d'un post
+    #[Route('/post/{id}/update', name: 'post.update', methods: ['POST'])]
+    public function update(
+        int $id,
+        Request $request,
+        PostRepository $postRepository,
+        LoggerInterface $logger,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        try {
+            // Récupérer l'utilisateur connecté
+            $currentUser = $this->getUser();
+            if (!$currentUser || !$currentUser instanceof User) {
+                return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
+            }
+
+            // Récupérer le post
+            $post = $postRepository->find($id);
+            if (!$post) {
+                return new JsonResponse(['error' => 'Post not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            // Vérifier que l'utilisateur est le propriétaire du post
+            if ($post->getUser()->getId() !== $currentUser->getId()) {
+                return new JsonResponse(['error' => 'You are not authorized to update this post'], Response::HTTP_FORBIDDEN);
+            }
+
+            $logger->info('Starting post update with POST method for post ID: ' . $id);
+
+            // 1. D'abord supprimer les médias à supprimer
+            $mediaToDelete = $request->request->all('mediaToDelete') ?: [];
+            $logger->info('Media to delete: ' . json_encode($mediaToDelete));
+
+            $uploadDirectory = $this->getParameter('posts_media_directory');
+            $mediaDeleted = [];
+
+            if (!empty($mediaToDelete)) {
+                $mediaCollection = $post->getMedia()->toArray(); // Convertir en tableau pour éviter les problèmes d'itération
+
+                foreach ($mediaToDelete as $mediaPath) {
+                    foreach ($mediaCollection as $media) {
+                        $path = $media->getMediaPath();
+                        if ($path === $mediaPath || basename($path) === basename($mediaPath)) {
+                            // Supprimer le fichier physique
+                            $filePath = $uploadDirectory . '/' . $path;
+                            if (file_exists($filePath)) {
+                                unlink($filePath);
+                                $logger->info('Deleted physical file: ' . $filePath);
+                            }
+
+                            // Dissocier et supprimer l'entité
+                            $post->removeMedia($media);
+                            $entityManager->remove($media);
+                            $mediaDeleted[] = $path;
+                            $logger->info('Removed media entity: ' . $path);
+                            break;
+                        }
+                    }
+                }
+
+                // Effectuer le flush pour les suppressions avant d'ajouter les nouveaux médias
+                $entityManager->flush();
+                $logger->info('Media deletion flush completed, deleted: ' . implode(', ', $mediaDeleted));
+            }
+
+            // 2. Mettre à jour le contenu
+            $content = trim($request->request->get('content', ''));
+            $post->setContent($content);
+            $entityManager->flush();
+            $logger->info('Content updated: ' . $content);
+
+            // 3. Ajouter les nouveaux médias
+            $mediaFiles = $request->files->get('media');
+            $newMediaPaths = [];
+
+            if ($mediaFiles && count($mediaFiles) > 0) {
+                if (!is_dir($uploadDirectory)) {
+                    mkdir($uploadDirectory, 0775, true);
+                    $logger->info('Created upload directory: ' . $uploadDirectory);
+                }
+
+                foreach ($mediaFiles as $mediaFile) {
+                    // Validation du type de fichier
+                    $mimeType = $mediaFile->getMimeType();
+                    $isValidImage = preg_match('/^image\/(jpe?g|png|gif|webp)/i', $mimeType);
+                    $isValidVideo = preg_match('/^video\/(mp4|webm|ogg)/i', $mimeType);
+                    $isValid = $isValidImage || $isValidVideo;
+
+                    if (!$isValid) {
+                        $extension = strtolower(pathinfo($mediaFile->getClientOriginalName(), PATHINFO_EXTENSION));
+                        if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'ogg'])) {
+                            $isValid = true;
+                        }
+                    }
+
+                    if ($isValid) {
+                        // Générer un nom unique avec timestamp pour éviter les problèmes de cache
+                        $fileName = uniqid('post_media_' . time() . '_') . '_' . $mediaFile->getClientOriginalName();
+                        $mediaFile->move($uploadDirectory, $fileName);
+
+                        // Créer et associer l'entité PostMedia
+                        $postMedia = new PostMedia();
+                        $postMedia->setPost($post);
+                        $postMedia->setMediaPath($fileName);
+                        $entityManager->persist($postMedia);
+                        $newMediaPaths[] = $fileName;
+                        $logger->info('Added new media: ' . $fileName);
+                    }
+                }
+
+                // Flush pour les nouveaux médias
+                $entityManager->flush();
+                $logger->info('New media flush completed, added: ' . implode(', ', $newMediaPaths));
+            }
+
+            // 4. Récupérer le post mis à jour depuis la base de données
+            $entityManager->clear(); // Vider l'unité de travail pour forcer un rechargement frais
+            $post = $postRepository->find($id);
+
+            if (!$post) {
+                throw new \Exception("Post couldn't be retrieved after update");
+            }
+
+            // 5. Préparer la réponse
+            $updatedMediaPaths = [];
+            foreach ($post->getMedia() as $media) {
+                $updatedMediaPaths[] = $media->getMediaPath();
+            }
+
+            $response = [
+                'id' => $post->getId(),
+                'content' => $post->getContent(),
+                'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
+                'user' => [
+                    'id' => $currentUser->getId(),
+                    'username' => $currentUser->getUsername(),
+                ],
+                'media' => $updatedMediaPaths
+            ];
+
+            $logger->info('Update successful. Final media count: ' . count($updatedMediaPaths));
+
+            return $this->json($response);
+        } catch (\Exception $e) {
+            $logger->error('Error updating post: ' . $e->getMessage());
+            $logger->error('Stack trace: ' . $e->getTraceAsString());
+            return new JsonResponse(['error' => 'Failed to update post: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { fetchUserToken } from '../../loader/loader';
 import DisconnectButton from '../Disconnect-Button/Disconnect-Button';
 import ProfilPicture from '../Profil-Picture/Profil-Picture';
+import { Link } from 'react-router-dom';
 
 export default function NavBarProfil() {
     const [username, setUsername] = useState<string | null>(null);
@@ -48,9 +49,9 @@ export default function NavBarProfil() {
                 <li className="flex flex-row md:flex-col gap-4 items-center">
                     
                     {/* Avatar avec photo de profil personnalisée */}
-                    <a
-                        className="text-bg font-bold hover:text-primary transition-all duration-300 ease-in-out transform hover:scale-105"
-                        href="/profil"
+                    <Link
+                        className="text-bg font-bold hover:text-primary transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 cursor-pointer"
+                        to="/profil"
                         title={`Accès au profil de ${username}`}
                     >
                         {userId ? (
@@ -73,7 +74,7 @@ export default function NavBarProfil() {
                                 alt={`Profil de ${username}`}
                             />
                         )}
-                    </a>
+                    </Link>
 
                     {/* Déconnexion */}
                     <DisconnectButton />

@@ -179,14 +179,16 @@ export default function NewPost() {
                     
                     {/* Bouton pour ajouter des médias */}
                     <div className="flex items-center mb-3">
+
                         <button 
                             type="button" 
                             onClick={handleMediaClick} 
-                            className={`flex items-center text-blue-500 hover:text-blue-700 ${mediaFiles.length >= maxMediaFiles ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`flex items-center transition-all duration-100 cursor-pointer bg-blue-500 rounded-md p-2 text-fg font-bold active:scale-95 ${mediaFiles.length >= maxMediaFiles ? 'opacity-50 cursor-not-allowed' : ''}`}
                             disabled={mediaFiles.length >= maxMediaFiles}
                         >
                             <span>Ajouter des médias</span>
                         </button>
+
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -212,6 +214,7 @@ export default function NewPost() {
                     >
                         {isSubmitting ? 'En cours...' : 'Create Post'}
                     </button>
+
                 </form>
             </div>
         </>

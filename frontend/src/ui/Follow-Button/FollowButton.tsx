@@ -65,7 +65,7 @@ export default function FollowButton({ userId }: FollowButtonProps) {
     }
 
     return (
-        <div className="flex flex-row-reverse md:flex-row items-center justify-center gap-2">
+        <div className="flex flex-row-reverse items-center justify-center gap-2">
             
             {/* nombre d'abonnées */}
             <span className="text-sm text-gray-600 font-medium">

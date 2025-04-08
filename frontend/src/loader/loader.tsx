@@ -79,6 +79,58 @@ export async function createPost(content: string, mediaFiles: File[] = []) {
     }
 }
 
+// Mettre à jour un post (avec ou sans médias)
+export async function updatePost(postId: string, content: string, mediaToDelete: string[] = [], mediaFiles: File[] = []) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No token found. Please log in to update a post.');
+        }
+
+        console.log("Updating post - Content:", content);
+        console.log("Media to delete:", mediaToDelete);
+        console.log("New media files:", mediaFiles.length);
+
+        const formData = new FormData();
+        formData.append('content', content);
+        
+        // Important: Utiliser cette méthode pour que PHP puisse correctement analyser le tableau
+        if (mediaToDelete.length > 0) {
+            mediaToDelete.forEach((path, index) => {
+                // Envoyez les chemins exacts tels qu'ils sont stockés
+                formData.append(`mediaToDelete[${index}]`, path);
+            });
+        }
+        
+        if (mediaFiles.length > 0) {
+            mediaFiles.forEach(file => {
+                formData.append('media[]', file);
+            });
+        }
+        
+        // Changé: Utilisation de la méthode POST sur la nouvelle URL
+        const response = await fetch(`${BASE_URL}/post/${postId}/update`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Error updating post: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Response from server:", data);
+        return data;
+    } catch (error) {
+        console.error('Error updating post:', error);
+        throw error;
+    }
+}
+
 // Fonction utilitaire pour vérifier si un fichier est une image ou une vidéo
 export function isMediaFileSupported(file: File): boolean {
     const supportedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
