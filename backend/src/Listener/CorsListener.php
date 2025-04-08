@@ -31,10 +31,11 @@ class CorsListener implements EventSubscriberInterface
 
         $response = new Response();
         
-        // Définir l'origine spécifique (pas de wildcard avec credentials)
+        // Définir l'origine spécifique
         if ($origin) {
             $response->headers->set('Access-Control-Allow-Origin', $origin);
         } else {
+            // Fallback pour localhost:8090
             $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:8090');
         }
         
@@ -45,22 +46,26 @@ class CorsListener implements EventSubscriberInterface
         $response->setStatusCode(Response::HTTP_NO_CONTENT);
         
         $event->setResponse($response);
-        $event->stopPropagation();
     }
 
     public function onKernelResponse(ResponseEvent $event): void
     {
+        if (!$event->isMainRequest()) {
+            return;
+        }
+        
         $response = $event->getResponse();
         $request = $event->getRequest();
         
         // Récupérer l'origine de la requête
         $origin = $request->headers->get('Origin');
         
-        // Définir l'origine spécifique (pas de wildcard avec credentials)
+        // Définir l'origine spécifique
         if ($origin) {
             $response->headers->set('Access-Control-Allow-Origin', $origin);
         } else {
-            $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:8090');
+            // Fallback pour localhost:8090
+            $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:8090'); 
         }
         
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');

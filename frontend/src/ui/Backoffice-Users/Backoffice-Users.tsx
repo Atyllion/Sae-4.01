@@ -24,7 +24,6 @@ export default function BackofficeUsers() {
                 isBanned: user.isBanned === true || user.isBan === true || user.isBanned === 1 || user.isBan === 1
             }));
             
-            console.log('Normalized users:', normalizedUsers); // Pour déboguer
             setUsers(normalizedUsers);
         } catch (error) {
             console.error('Erreur lors de la récupération des utilisateurs :', error);

@@ -16,6 +16,11 @@ use App\Service\PostService;
 use App\Dto\Payload\CreatePostPayload;
 use Psr\Log\LoggerInterface;
 
+use App\Entity\Post;
+use App\Entity\User;
+use App\Entity\PostMedia;
+use Doctrine\ORM\EntityManagerInterface;
+
 class PostController extends AbstractController
 {
     // No additional code is needed at $PLACEHOLDER$ for this functionality.
@@ -42,6 +47,11 @@ class PostController extends AbstractController
             $user = $post->getUser();
             $isBanned = $user->isBanned();
 
+            $mediaData = [];
+            foreach ($post->getMedia() as $media) {
+                $mediaData[] = $media->getMediaPath();
+            }
+
             $posts[] = [
                 'id' => $post->getId(),
                 'content' => $isBanned
@@ -51,10 +61,11 @@ class PostController extends AbstractController
                 'user' => [
                     'id' => $user->getId(),
                     'username' => $user->getUsername(),
-                    'isBanned' => $isBanned, // Ajout de l'information de bannissement
+                    'isBanned' => $isBanned,
                 ],
-                // Ne pas inclure les likes si l'utilisateur est banni
                 'likesCount' => $isBanned ? 0 : count($post->getLikes()),
+                'repliesCount' => $isBanned ? 0 : count($post->getReplies()),
+                'media' => $isBanned ? [] : $mediaData
             ];
         }
 
@@ -83,17 +94,18 @@ class PostController extends AbstractController
 
         $response = [
             'id' => $post->getId(),
-            'content' => $isBanned
-                ? ""
-                : $post->getContent(),
+            'content' => $isBanned ? "" : $post->getContent(),
             'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
             'user' => [
                 'id' => $user->getId(),
                 'username' => $user->getUsername(),
-                'isBanned' => $isBanned, // Ajout de l'information de bannissement
+                'isBanned' => $isBanned,
             ],
-            // Ne pas inclure les likes si l'utilisateur est banni
             'likesCount' => $isBanned ? 0 : count($post->getLikes()),
+            'repliesCount' => $isBanned ? 0 : count($post->getReplies()),
+            'media' => $isBanned ? [] : array_map(function ($media) {
+                return $media->getMediaPath();
+            }, $post->getMedia()->toArray())
         ];
 
         return $this->json($response);
@@ -133,9 +145,15 @@ class PostController extends AbstractController
 
         $posts = [];
         foreach ($paginator as $post) {
+
+            $mediaData = [];
+            foreach ($post->getMedia() as $media) {
+                $mediaData[] = $media->getMediaPath();
+            }
+
             $posts[] = [
                 'id' => $post->getId(),
-                'content' => $isUserBanned 
+                'content' => $isUserBanned
                     ? ""
                     : $post->getContent(),
                 'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
@@ -146,6 +164,8 @@ class PostController extends AbstractController
                 ],
                 // Ne pas inclure les likes si l'utilisateur est banni
                 'likesCount' => $isUserBanned ? 0 : count($post->getLikes()),
+                'repliesCount' => $isUserBanned ? 0 : count($post->getReplies()),
+                'media' => $isUserBanned ? [] : $mediaData
             ];
         }
 
@@ -159,49 +179,149 @@ class PostController extends AbstractController
         ]);
     }
 
-    // Création d'un post
-    #[Route('/posts', name: 'posts.create', methods: ['POST'], format: 'json')]
+    // Création d'un post (avec ou sans médias)
+    // Création d'un post (avec ou sans médias)
+    #[Route('/posts_create', name: 'posts.create', methods: ['POST'])]
     public function create(
         Request $request,
         PostService $postService,
         ValidatorInterface $validator,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        \Doctrine\ORM\EntityManagerInterface $entityManager
     ): Response {
-        $data = json_decode($request->getContent(), true);
-
-        $payload = new CreatePostPayload();
-        $payload->content = trim($data['content'] ?? '');
-
-        // Ensure the user is set in the payload
-        $user = $this->getUser();
-        if (!$user || !$user instanceof \App\Entity\User) {
-            return new JsonResponse(['error' => 'User not authenticated or invalid user type'], Response::HTTP_UNAUTHORIZED);
-        }
-        $payload->user = $user;
-
-        $logger->info('Contenu reçu : ' . $payload->content);
-        $logger->info('Longueur du contenu : ' . strlen($payload->content));
-
-        $errors = $validator->validate($payload, null, ['Default']);
-        if (count($errors) > 0) {
-            $errorMessages = [];
-            foreach ($errors as $error) {
-                $errorMessages[] = $error->getMessage();
+        try { // Ajout d'un try-catch global pour capturer toutes les erreurs
+            $user = $this->getUser();
+            if (!$user || !$user instanceof \App\Entity\User) {
+                return new JsonResponse(['error' => 'User not authenticated or invalid user type'], Response::HTTP_UNAUTHORIZED);
             }
-            return new JsonResponse(['errors' => $errorMessages], Response::HTTP_UNPROCESSABLE_ENTITY);
+
+            if ($user->isBanned()) {
+                return new JsonResponse(['error' => 'Banned users cannot create posts'], Response::HTTP_FORBIDDEN);
+            }
+
+            // Vérifier si la requête contient du JSON ou du FormData
+            $isJsonRequest = str_contains($request->headers->get('Content-Type', ''), 'application/json');
+
+            // Récupérer le contenu du post
+            $content = '';
+            if ($isJsonRequest) {
+                $data = json_decode($request->getContent(), true);
+                $content = trim($data['content'] ?? '');
+            } else {
+                $content = trim($request->request->get('content', ''));
+            }
+
+            // Créer un nouveau post
+            $post = new \App\Entity\Post();
+            $post->setContent($content);
+            $post->setCreatedAt(new \DateTime());
+            $post->setUser($user);
+
+            // MODIFICATION CRUCIALE: Persister le post AVANT de créer les médias
+            $entityManager->persist($post);
+            $entityManager->flush(); // Flush pour générer un ID pour le post
+
+            $logger->info('Post created with ID: ' . $post->getId());
+
+            // Traiter les fichiers médias s'il y en a
+            $uploadedMediaPaths = [];
+            $mediaFiles = $request->files->get('media');
+
+            if ($mediaFiles) {
+                $uploadDirectory = $this->getParameter('posts_media_directory');
+                $logger->info('Upload directory: ' . $uploadDirectory);
+
+                // Créer le répertoire s'il n'existe pas
+                if (!is_dir($uploadDirectory)) {
+                    mkdir($uploadDirectory, 0775, true);
+                    $logger->info('Created upload directory');
+                }
+
+                foreach ($mediaFiles as $mediaFile) {
+                    // Vérifier si le fichier est une image ou une vidéo avec une validation plus souple
+                    $mimeType = $mediaFile->getMimeType();
+                    $originalFilename = $mediaFile->getClientOriginalName();
+
+                    $logger->info('Processing file: ' . $originalFilename . ' with type: ' . $mimeType);
+
+                    // Validation plus souple des types MIME
+                    $isValidImage = preg_match('/^image\/(jpe?g|png|gif|webp)/i', $mimeType);
+                    $isValidVideo = preg_match('/^video\/(mp4|webm|ogg)/i', $mimeType);
+                    $isValid = $isValidImage || $isValidVideo;
+
+                    if (!$isValid) {
+                        $extension = strtolower(pathinfo($originalFilename, PATHINFO_EXTENSION));
+                        if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm', 'ogg'])) {
+                            $isValid = true;
+                            $logger->info('Validated by extension: ' . $extension);
+                        }
+                    }
+
+                    if (!$isValid) {
+                        $logger->warning('Invalid mime type: ' . $mimeType);
+                        continue;
+                    }
+
+                    // Générer un nom de fichier unique
+                    $fileName = uniqid('post_media_') . '_' . $mediaFile->getClientOriginalName();
+
+                    try {
+                        // Déplacer le fichier téléchargé vers le répertoire de destination
+                        $mediaFile->move($uploadDirectory, $fileName);
+                        $uploadedMediaPaths[] = $fileName;
+                        $logger->info('File uploaded: ' . $fileName);
+                    } catch (\Exception $e) {
+                        $logger->error('Error uploading file: ' . $e->getMessage());
+                        return new JsonResponse(['error' => 'Failed to upload media file: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+                    }
+                }
+
+                // Associer les médias au post déjà persisté
+                foreach ($uploadedMediaPaths as $mediaPath) {
+                    $postMedia = new \App\Entity\PostMedia();
+                    $postMedia->setPost($post); // Post déjà persisté avec un ID
+                    $postMedia->setMediaPath($mediaPath);
+                    $entityManager->persist($postMedia);
+                    $logger->info('Media path: ' . $mediaPath . ' associated with post #' . $post->getId());
+                }
+
+                // Flush pour sauvegarder les médias
+                $entityManager->flush();
+            }
+
+            // Valider le contenu du post uniquement si pas de médias
+            if (empty($uploadedMediaPaths) && empty(trim($content))) {
+                return new JsonResponse(['error' => 'Post content cannot be empty if no media is provided'], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Préparer la réponse
+            $mediaData = array_map(function ($path) {
+                return $path;
+            }, $uploadedMediaPaths);
+
+            $response = [
+                'id' => $post->getId(),
+                'content' => $post->getContent(),
+                'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
+                'user' => [
+                    'id' => $user->getId(),
+                    'username' => $user->getUsername(),
+                ],
+                'media' => $mediaData
+            ];
+
+            return new JsonResponse($response, Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            // Log l'erreur complète
+            $logger->error('CRITICAL ERROR: ' . $e->getMessage());
+            $logger->error('Stack trace: ' . $e->getTraceAsString());
+
+            // Retourner une réponse d'erreur détaillée
+            return new JsonResponse([
+                'error' => 'Failed to create post: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $post = $postService->create($payload, $user);
-        $response = [
-            'id' => $post->getId(),
-            'content' => $post->getContent(),
-            'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
-            'user' => [
-                'id' => $user->getId(),
-                'username' => $user->getUsername(),
-            ],
-        ];
-
-        return new JsonResponse($response, Response::HTTP_CREATED);
     }
 }

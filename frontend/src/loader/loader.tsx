@@ -17,8 +17,8 @@ export async function fetchPosts(page = 1) {
     }
 }
 
-// Créer un post
-export async function createPost(postData: { content: string; user?: string }) {
+// Créer un post (avec ou sans médias)
+export async function createPost(content: string, mediaFiles: File[] = []) {
     try {
         const token = localStorage.getItem('token');
 
@@ -26,28 +26,71 @@ export async function createPost(postData: { content: string; user?: string }) {
             throw new Error('No token found. Please log in to create a post.');
         }
 
-        const userResponse = await fetchUserToken();
-        if (!userResponse.ok) {
-            throw new Error('Failed to fetch user data');
+        let response;
+        
+        // Si nous avons des fichiers médias, utiliser FormData
+        if (mediaFiles && mediaFiles.length > 0) {
+            const formData = new FormData();
+            formData.append('content', content);
+        
+            mediaFiles.forEach((file, index) => {
+                formData.append(`media[${index}]`, file);
+            });
+        
+            response = await fetch(`${BASE_URL}/posts_create`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+        } else {
+            // Sinon, utiliser JSON comme avant
+            const userResponse = await fetchUserToken();
+            if (!userResponse.ok) {
+                throw new Error('Failed to fetch user data');
+            }
+
+            const userData = await userResponse.json();
+            const postData = { 
+                content: content,
+                user: userData.id
+            };
+
+            response = await fetch(`${BASE_URL}/posts_create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(postData)
+            });
         }
 
-        const userData = await userResponse.json();
-        postData.user = userData.id; // Ensure the correct user ID is assigned
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Error creating post: ${response.status}`);
+        }
 
-        const response = await fetch(`${BASE_URL}/posts`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(postData),
-        });
-        console.log("response", response);
-        return response; // Ensure a valid Response object is returned
+        return response;
     } catch (error) {
         console.error('Error creating post:', error);
         throw error;
     }
+}
+
+// Fonction utilitaire pour vérifier si un fichier est une image ou une vidéo
+export function isMediaFileSupported(file: File): boolean {
+    const supportedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const supportedVideoTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+    
+    return [...supportedImageTypes, ...supportedVideoTypes].includes(file.type);
+}
+
+// Fonction pour obtenir l'URL d'un média de post
+export function getPostMediaUrl(mediaPath: string) {
+    if (!mediaPath) return null;
+    return `${BASE_URL}/uploads/${mediaPath}`;
 }
 
 // Récupérer tous les tokens
@@ -170,20 +213,43 @@ export async function fetchUserById(userId: string) {
 // Mettre à jour les informations d'un utilisateur
 export async function patchUserById(userId: string, userData: { username?: string; email?: string }) {
     try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            throw new Error('No token found. Please log in to update user data.');
+        }
+        
         const response = await fetch(`${BASE_URL}/updateuser/${userId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // Ajout du token d'authentification
             },
             body: JSON.stringify(userData),
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `Erreur HTTP : ${response.status}`);
+            // Vérifier d'abord le type de contenu
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Erreur HTTP : ${response.status}`);
+            } else {
+                // Si ce n'est pas du JSON, retourner le texte brut ou un message d'erreur générique
+                const textError = await response.text();
+                console.error('Réponse brute du serveur:', textError);
+                throw new Error(`Erreur HTTP : ${response.status}. Le serveur n'a pas renvoyé de JSON valide.`);
+            }
         }
 
-        return await response.json();
+        // Vérifier également si la réponse réussie est bien du JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json();
+        } else {
+            console.warn('La réponse réussie n\'est pas au format JSON');
+            return { success: true, message: 'Utilisateur mis à jour avec succès' };
+        }
     } catch (error) {
         console.error('Erreur lors de la mise à jour de l\'utilisateur :', error);
         throw error;
@@ -344,6 +410,159 @@ export async function getPostLikes(postId: string) {
     } catch (error) {
         console.error('Error fetching post likes:', error);
         throw error;
+    }
+}
+
+// Récupérer les réponses d'un post
+export async function fetchReplies(postId: string, page: number = 1, limit: number = 10) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/posts/${postId}/replies?page=${page}&limit=${limit}`);
+        
+        if (!response.ok) {
+            throw new Error(`Error fetching replies: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching replies:', error);
+        throw error;
+    }
+}
+
+// Créer une réponse à un post
+export async function createReply(postId: string, content: string) {
+    try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            throw new Error('No token found. Please log in to reply to a post.');
+        }
+        
+        const response = await fetch(`${BASE_URL}/api/posts/${postId}/reply`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ content })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Error creating reply: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating reply:', error);
+        throw error;
+    }
+}
+
+// Supprimer une réponse
+export async function deleteReply(replyId: string) {
+    try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            throw new Error('No token found. Please log in to delete a reply.');
+        }
+        
+        console.log(`Attempting to delete reply with ID: ${replyId}`);
+        
+        const response = await fetch(`${BASE_URL}/api/replies/${replyId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        console.log(`Delete response status: ${response.status}`);
+        
+        if (!response.ok) {
+            let errorMsg = `Error deleting reply: ${response.status}`;
+            try {
+                const errorData = await response.json();
+                errorMsg += ` - ${errorData.error || 'Unknown error'}`;
+            } catch (e) {
+                // Ignore JSON parsing error
+            }
+            throw new Error(errorMsg);
+        }
+        
+        console.log('Reply deleted successfully');
+        return true;
+    } catch (error) {
+        console.error('Error deleting reply:', error);
+        throw error;
+    }
+}
+
+// Liker ou unliker une réponse
+export async function toggleReplyLike(replyId: string) {
+    try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            throw new Error('No token found. Please log in to like a reply.');
+        }
+        
+        const response = await fetch(`${BASE_URL}/api/replies/${replyId}/like`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Error toggling reply like: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error toggling reply like:', error);
+        throw error;
+    }
+}
+
+// Vérifier si l'utilisateur a liké une réponse
+export async function getReplyLikes(replyId: string) {
+    try {
+        const token = localStorage.getItem('token');
+        const headers: HeadersInit = {};
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`${BASE_URL}/api/replies/${replyId}/likes`, {
+            headers
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Error fetching reply likes: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching reply likes:', error);
+        throw error;
+    }
+}
+
+// Récupérer le nombre de réponse pour un post
+export async function fetchReplyCount(postId: string) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/posts/${postId}/replies/count`);
+        
+        if (!response.ok) {
+            throw new Error(`Error fetching reply count: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.repliesCount; // Changed to match the key from the backend
+    } catch (error) {
+        console.error('Error fetching reply count:', error);
+        return 0;
     }
 }
 

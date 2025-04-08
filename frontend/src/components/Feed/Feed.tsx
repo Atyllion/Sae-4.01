@@ -150,6 +150,7 @@ export default function Feed({ userId, title }: FeedProps = {}) {
                                 created_at={new Date(post.created_at).toISOString()}
                                 id={post.id}
                                 user={post.user}
+                                media={post.media}
                             />
                         ))
                     ) : (

@@ -38,8 +38,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         );
     }
 
-    console.log('userData', userData);
-
     return (
         <div className='flex flex-col gap-4 bg-white rounded-lg shadow-md items-start'>
 

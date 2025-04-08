@@ -52,48 +52,80 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
     }, [user.id]);
 
     const handleSave = async () => {
-        // Fetch the latest user data from the backend to compare
-        let latestUserData: { id: string; email: string; username: string }[];
+        setIsProcessing(true);
+        setError(null);
+
         try {
-            latestUserData = await fetchUsers();
+            // Fetch the latest user data from the backend to compare
+            const latestUserData = await fetchUsers();
             const currentUser = latestUserData.find((u: { id: string }) => u.id === user.id);
 
             if (!currentUser) {
-                alert('Utilisateur introuvable.');
                 setError('Utilisateur introuvable.');
+                setIsProcessing(false);
                 return;
             }
 
             // Compare input values with backend data
             const updatedData: { username?: string; email?: string } = {};
 
+            // Only update username if it's different from the current one AND not empty
             if (username.trim() && username !== currentUser.username) {
-                updatedData.username = username;
+                // Check for duplicates
+                const usernameExists = latestUserData.some(
+                    (u: any) => u.id !== user.id && u.username === username.trim()
+                );
+
+                if (usernameExists) {
+                    setError("Ce nom d'utilisateur est déjà utilisé par un autre compte.");
+                    setIsProcessing(false);
+                    return;
+                }
+
+                updatedData.username = username.trim();
             }
 
-            if (email.trim() && email !== currentUser.email) {
-                updatedData.email = email;
+            // Only update email if it's different from the current one AND not empty
+            // Also check if email field was actually changed by the user
+            if (email.trim() && email !== user.email) {
+                // Check for duplicates
+                const emailExists = latestUserData.some(
+                    (u: any) => u.id !== user.id && u.email === email.trim()
+                );
+
+                if (emailExists) {
+                    setError("Cet email est déjà utilisé par un autre compte.");
+                    setIsProcessing(false);
+                    return;
+                }
+
+                updatedData.email = email.trim();
             }
 
             // If no changes, do nothing
             if (Object.keys(updatedData).length === 0) {
-                alert('Aucune modification détectée.');
                 setError('Aucune modification détectée.');
+                setIsProcessing(false);
                 return;
             }
 
             // Save changes to the backend
-            try {
-                await patchUserById(user.id, updatedData);
-                alert('Modifications enregistrées avec succès.');
-                setError(null);
-            } catch (err) {
-                console.error('Erreur lors de la mise à jour de l\'utilisateur :', err);
+            await patchUserById(user.id, updatedData);
+            alert('Modifications enregistrées avec succès.');
+            setError(null);
+        } catch (err: any) {
+            console.error('Erreur lors de la mise à jour de l\'utilisateur :', err);
+
+            // Afficher un message d'erreur spécifique
+            if (err.message && err.message.includes('Email already in use')) {
+                setError('Cet email est déjà utilisé par un autre compte.');
+            } else if (err.message && err.message.includes('Username already in use')) {
+                setError("Ce nom d'utilisateur est déjà utilisé par un autre compte.");
+            } else {
                 setError('Une erreur est survenue lors de la mise à jour.');
             }
-        } catch (err) {
-            console.error('Erreur lors de la récupération des données utilisateur :', err);
-            setError('Une erreur est survenue lors de la récupération des données utilisateur.');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -141,11 +173,12 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
                     <input
                         id='username__input'
                         type="text"
-                        placeholder={`Modifier le nom d'utilisateur de ${user.username}`}
+                        value={username}
                         className="mt-2 p-4 w-full text-black padding border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
-
                         onChange={(e) => setUsername(e.target.value)}
                     />
+
+                    <p className='text-xs text-bg italic text-gray-500'>Modifier le nom d'utilisateur de cette utilisateur</p>
                 </div>
 
                 {/* e-mail + input */}
@@ -153,7 +186,7 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
 
                     <div className="flex flex-row items-center gap-4">
                         <h3 className="text-lg font-bold text-gray-600">E-mail :</h3>
-                        <p 
+                        <p
                             className="text-xl text-gray-800 max-w-45 truncate"
                             title={user.email}
                         >
@@ -164,10 +197,12 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
                     <input
                         id='email__input'
                         type="email"
-                        placeholder={`Modifier l'email de ${user.email}`}
+                        value={email}
                         className="mt-2 p-4 w-full padding border text-black border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
                         onChange={(e) => setEmail(e.target.value)}
                     />
+
+                    <p className='text-xs text-bg italic text-gray-500'>Modifier le mail de cette utilisateur</p>
                 </div>
 
                 <div className='flex flex-col gap-4 w-full'>
@@ -197,16 +232,15 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
                                 id={isBanned ? "unban__button" : "ban__button"}
                                 onClick={isBanned ? handleUnbanUser : handleBanUser}
                                 disabled={isProcessing}
-                                className={`padding text-white font-medium p-3 rounded-md shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-opacity-75 disabled:opacity-50 w-full ${
-                                    isBanned 
-                                        ? "bg-green-600 hover:bg-green-700 focus:ring-green-400" 
-                                        : "bg-red-600 hover:bg-red-700 focus:ring-red-400"
-                                }`}
+                                className={`padding text-white font-medium p-3 rounded-md shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-opacity-75 disabled:opacity-50 w-full ${isBanned
+                                    ? "bg-green-600 hover:bg-green-700 focus:ring-green-400"
+                                    : "bg-red-600 hover:bg-red-700 focus:ring-red-400"
+                                    }`}
                             >
-                                {isProcessing 
-                                    ? 'En cours...' 
-                                    : isBanned 
-                                        ? 'Débannir l\'utilisateur' 
+                                {isProcessing
+                                    ? 'En cours...'
+                                    : isBanned
+                                        ? 'Débannir l\'utilisateur'
                                         : 'Bannir l\'utilisateur'
                                 }
                             </button>

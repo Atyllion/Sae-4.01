@@ -34,6 +34,20 @@ class Post
     #[ORM\OneToMany(mappedBy: 'post', targetEntity: Likes::class, orphanRemoval: true)]
     private Collection $likes;
 
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: Reply::class, orphanRemoval: true)]
+    private Collection $replies;
+
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: PostMedia::class, cascade: ['persist', 'remove'])]
+    private Collection $media;
+
+    public function __construct()
+    {
+        $this->likes = new ArrayCollection();
+        $this->replies = new ArrayCollection();
+        $this->media = new ArrayCollection();
+        $this->created_at = new \DateTime();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -82,6 +96,8 @@ class Post
         return $this;
     }
 
+    // Gestion des likes
+
     /**
      * @return Collection<int, Likes>
      */
@@ -89,17 +105,17 @@ class Post
     {
         return $this->likes;
     }
-    
+
     public function addLike(Likes $like): static
     {
         if (!$this->likes->contains($like)) {
             $this->likes->add($like);
             $like->setPost($this);
         }
-        
+
         return $this;
     }
-    
+
     public function removeLike(Likes $like): static
     {
         if ($this->likes->removeElement($like)) {
@@ -108,13 +124,76 @@ class Post
                 $like->setPost(null);
             }
         }
-        
+
         return $this;
     }
-    
+
     // Méthode helper pour obtenir le nombre de likes
     public function getLikesCount(): int
     {
         return $this->likes->count();
+    }
+
+    // Gestion des réponses
+
+    /**
+     * @return Collection<int, Reply>
+     */
+    public function getReplies(): Collection
+    {
+        return $this->replies;
+    }
+
+    public function addReply(Reply $reply): static
+    {
+        if (!$this->replies->contains($reply)) {
+            $this->replies->add($reply);
+            $reply->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReply(Reply $reply): static
+    {
+        if ($this->replies->removeElement($reply)) {
+            // set the owning side to null (unless already changed)
+            if ($reply->getPost() === $this) {
+                $reply->setPost(null);
+            }
+        }
+
+        return $this;
+    }
+
+    // Gestion des médias
+    /**
+     * @return Collection<int, PostMedia>
+     */
+    public function getMedia(): Collection
+    {
+        return $this->media;
+    }
+
+    public function addMedia(PostMedia $media): static
+    {
+        if (!$this->media->contains($media)) {
+            $this->media->add($media);
+            $media->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMedia(PostMedia $media): static
+    {
+        if ($this->media->removeElement($media)) {
+            // set the owning side to null (unless already changed)
+            if ($media->getPost() === $this) {
+                $media->setPost(null);
+            }
+        }
+
+        return $this;
     }
 }

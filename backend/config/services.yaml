@@ -6,6 +6,7 @@
 parameters:
     Profil_directory: '%kernel.project_dir%/public/uploads'
     Banner_directory: '%kernel.project_dir%/public/uploads'
+    posts_media_directory: '%kernel.project_dir%/public/uploads'
 
 
 services:

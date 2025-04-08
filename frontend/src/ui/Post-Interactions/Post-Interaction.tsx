@@ -1,15 +1,29 @@
 import React from "react";
 import PostLikes from "../Post-Likes/Post-Likes";
+import ReplyButton from "../Post-Reply/Post-Reply";
 
 interface PostInteractionProps {
     postId: string;
+    repliesCount: number;
+    showReplies: boolean;
+    onToggleReplies: () => void;
 }
 
-export default function PostInteraction({ postId }: PostInteractionProps) {
+export default function PostInteraction({ 
+    postId, 
+    repliesCount, 
+    showReplies, 
+    onToggleReplies 
+}: PostInteractionProps) {
     return (
-        <div className="flex flex-row items-center gap-4 mt-3 border-t pt-2 border-gray-200">
+        <div className="flex flex-row items-center gap-4">
             <PostLikes postId={postId} />
-            {/* Ajoutez d'autres interactions ici si nécessaire, comme les commentaires */}
+            <ReplyButton 
+                postId={postId} 
+                repliesCount={repliesCount} 
+                showReplies={showReplies}
+                onToggleReplies={onToggleReplies}
+            />
         </div>
     )
 }

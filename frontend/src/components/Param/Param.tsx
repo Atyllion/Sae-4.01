@@ -70,7 +70,7 @@ export default function Param() {
                     localization: userData.localization
                 });
                 console.log('Details updated:', result);
-
+                alert('Profil enregistrés avec succès');
                 // Optional: Show success message
                 setError(null);
             } catch (error) {
