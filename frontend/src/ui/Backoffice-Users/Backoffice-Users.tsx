@@ -78,11 +78,11 @@ export default function BackofficeUsers() {
             </div>
 
             {/* liste des users */}
-            <div className="flex-1 w-full overflow-y-auto pb-4">
+            <div className="flex-1 w-full overflow-y-auto pb-4 ">
                 {hasNoResults ? (
                     <p className="text-center text-fg mt-8 animate-pulse">Aucun utilisateur trouvé</p>
                 ) : (
-                    <ul className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 jus gap-4 px-2">
+                    <ul className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 jus gap-4 px-2 items-center align-middle justify-center">
                         {filteredUsers.map((user) => (
                                 <BackofficeUser user={user} />
                         ))}

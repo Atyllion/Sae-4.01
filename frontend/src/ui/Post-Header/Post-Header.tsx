@@ -17,7 +17,7 @@ const PostHeader: React.FC<PostHeaderProps> = ({ user, isAuthor, userBanned }) =
                     <p className='text-bg font-bold text-lg w-fit py-2 hover:text-indigo-500 transition-colors' title='Votre Profil'>{user?.username || 'Unknown User'}</p>
                 </Link>
             ) : userBanned ? (
-                <div className='flex flex-row items-start bg-red-500 rounded-2xl gap-4 w-full opacity-75'>
+                <div className='flex flex-row items-start bg-red-500 rounded-2xl gap-4 w-full'>
                     <p className='text-bg font-bold text-lg text-white w-fit p-2' title='Utilisateur banni'>Utilisateur Banni</p>
                 </div>
             ) : (

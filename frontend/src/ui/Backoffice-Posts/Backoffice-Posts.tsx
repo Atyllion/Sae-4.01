@@ -33,9 +33,8 @@ export default function BackofficePosts() {
     );
 
     return (
-        <div className="flex flex-col h-screen gap-4 px-2 sm:px-4 lg:px-8">
+        <div className="flex flex-col h-screen w-full gap-4 px-2 sm:px-4 lg:px-8">
             <div className="bg-background/95 backdrop-blur-sm shadow-sm py-4 px-2 w-full transition-all duration-300">
-                <BackButton />
 
                 <h1 className="text-xl sm:text-2xl w-fit lg:text-3xl font-bold mb-2 text-center text-fg animate-fade-in">
                     Modération des posts

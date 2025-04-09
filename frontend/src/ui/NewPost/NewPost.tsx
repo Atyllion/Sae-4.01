@@ -122,7 +122,7 @@ export default function NewPost() {
     return (
         <>
             <div className="flex flex-col items-center justify-center bg-[var(--bg-color)] rounded-lg p-4 w-full md:w-full">
-                <h1 className="text-2xl md:text-4xl leading-tight md:leading-snug">Create a New Post</h1>
+                <h1 className="text-2xl md:text-4xl leading-tight md:leading-snug">Céer un nouveau post</h1>
                 
                 {error && (
                     <div className="w-full p-3 my-3 text-red-700 bg-red-100 border border-red-200 rounded-md">
@@ -133,7 +133,7 @@ export default function NewPost() {
                 <form onSubmit={handleSubmit} className="w-full">
                     <textarea
                         autoComplete="true"
-                        placeholder="What do you have in mind? max 280 characters"
+                        placeholder="Vous avez quoi en tête ?"
                         className="text-base leading-relaxed text-left w-full h-40 resize-none p-2 my-4 border border-[var(--border-color)] rounded-md"
                         id="post_text_content"
                         name="content"
@@ -144,7 +144,7 @@ export default function NewPost() {
                     ></textarea>
                     
                     <div className="text-sm text-gray-500 mb-2">
-                        {maxCharacters - content.length} characters remaining
+                        {maxCharacters - content.length} Charactères Restants
                     </div>
                     
                     {/* Zone de prévisualisation des médias */}
@@ -207,12 +207,12 @@ export default function NewPost() {
                     
                     <button
                         id="NewPostButton"
-                        className="rounded-lg border border-transparent py-4 px-0 text-sm font-medium bg-[var(--color-fg)] text-[var(--color-bg)] cursor-pointer w-full transition-colors duration-200 hover:border-[var(--primary-color)] focus:outline-4 focus:outline-webkit-focus-ring-color disabled:opacity-50"
+                        className="rounded-lg border border-transparent py-4 px-0 text-lg bg-fg text-bg font-bold active:scale-95 transition-all duration-100 cursor-pointer w-full focus:outline-4 disabled:opacity-50"
                         type="submit"
                         title='Créer un post'
                         disabled={isSubmitting || (!content.trim() && mediaFiles.length === 0)}
                     >
-                        {isSubmitting ? 'En cours...' : 'Create Post'}
+                        {isSubmitting ? 'En cours...' : 'Poster'}
                     </button>
 
                 </form>
@@ -220,5 +220,3 @@ export default function NewPost() {
         </>
     );
 }
-
-
