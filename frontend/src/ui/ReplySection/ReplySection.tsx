@@ -81,7 +81,7 @@ export default function ReplySection({ postId, isExpanded, onClose, onReplyCount
                 onReplyCountChange(replies.length + 1);
             }
         } catch (err: any) {
-            alert(err.message || 'Failed to create reply');
+            console.log(err.message || 'Failed to create reply');
         } finally {
             setSubmitting(false);
         }
