@@ -418,7 +418,7 @@ export async function toggleLike(postId: string) {
             throw new Error('No token found. Please log in to like a post.');
         }
 
-        const response = await fetch(`${BASE_URL}/api/posts/${postId}/like`, {
+        const response = await fetch(`${BASE_URL}/posts/${postId}/like`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -450,7 +450,7 @@ export async function getPostLikes(postId: string) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`${BASE_URL}/api/posts/${postId}/likes`, {
+        const response = await fetch(`${BASE_URL}/posts/${postId}/likes`, {
             headers
         });
 
@@ -468,7 +468,7 @@ export async function getPostLikes(postId: string) {
 // Récupérer les réponses d'un post
 export async function fetchReplies(postId: string, page: number = 1, limit: number = 10) {
     try {
-        const response = await fetch(`${BASE_URL}/api/posts/${postId}/replies?page=${page}&limit=${limit}`);
+        const response = await fetch(`${BASE_URL}/posts/${postId}/replies?page=${page}&limit=${limit}`);
         
         if (!response.ok) {
             throw new Error(`Error fetching replies: ${response.status}`);
@@ -490,7 +490,7 @@ export async function createReply(postId: string, content: string) {
             throw new Error('No token found. Please log in to reply to a post.');
         }
         
-        const response = await fetch(`${BASE_URL}/api/posts/${postId}/reply`, {
+        const response = await fetch(`${BASE_URL}/posts/${postId}/reply`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -521,7 +521,7 @@ export async function deleteReply(replyId: string) {
         
         console.log(`Attempting to delete reply with ID: ${replyId}`);
         
-        const response = await fetch(`${BASE_URL}/api/replies/${replyId}`, {
+        const response = await fetch(`${BASE_URL}/replies/${replyId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -558,7 +558,7 @@ export async function toggleReplyLike(replyId: string) {
             throw new Error('No token found. Please log in to like a reply.');
         }
         
-        const response = await fetch(`${BASE_URL}/api/replies/${replyId}/like`, {
+        const response = await fetch(`${BASE_URL}/replies/${replyId}/like`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -586,7 +586,7 @@ export async function getReplyLikes(replyId: string) {
             headers['Authorization'] = `Bearer ${token}`;
         }
         
-        const response = await fetch(`${BASE_URL}/api/replies/${replyId}/likes`, {
+        const response = await fetch(`${BASE_URL}/replies/${replyId}/likes`, {
             headers
         });
         
@@ -604,7 +604,7 @@ export async function getReplyLikes(replyId: string) {
 // Récupérer le nombre de réponse pour un post
 export async function fetchReplyCount(postId: string) {
     try {
-        const response = await fetch(`${BASE_URL}/api/posts/${postId}/replies/count`);
+        const response = await fetch(`${BASE_URL}/posts/${postId}/replies/count`);
         
         if (!response.ok) {
             throw new Error(`Error fetching reply count: ${response.status}`);
@@ -627,7 +627,7 @@ export async function followUser(userId: string) {
             throw new Error('No token found. Please log in to follow users.');
         }
 
-        const response = await fetch(`${BASE_URL}/api/users/${userId}/follow`, {
+        const response = await fetch(`${BASE_URL}/users/${userId}/follow`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -655,7 +655,7 @@ export async function unfollowUser(userId: string) {
             throw new Error('No token found. Please log in to unfollow users.');
         }
 
-        const response = await fetch(`${BASE_URL}/api/users/${userId}/unfollow`, {
+        const response = await fetch(`${BASE_URL}/users/${userId}/unfollow`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -683,7 +683,7 @@ export async function fetchUserFollowing() {
             throw new Error('No token found. Please log in to view your follows.');
         }
 
-        const response = await fetch(`${BASE_URL}/api/users/following`, {
+        const response = await fetch(`${BASE_URL}/users/following`, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
@@ -713,7 +713,7 @@ export async function isFollowingUser(userId: string) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        const response = await fetch(`${BASE_URL}/api/users/${userId}/is-following`, {
+        const response = await fetch(`${BASE_URL}/users/${userId}/is-following`, {
             headers
         });
 
@@ -809,6 +809,116 @@ export async function unbanUser(userId: string) {
         return await response.json();
     } catch (error) {
         console.error('Error unbanning user:', error);
+        throw error;
+    }
+}
+
+// Bloquer un utilisateur
+export async function blockUser(userId: string) {
+    try {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            throw new Error('No token found. Please log in to block users.');
+        }
+
+        const response = await fetch(`${BASE_URL}/users/${userId}/block`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error blocking user:', error);
+        throw error;
+    }
+}
+
+// Débloquer un utilisateur
+export async function unblockUser(userId: string) {
+    try {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            throw new Error('No token found. Please log in to unblock users.');
+        }
+
+        const response = await fetch(`${BASE_URL}/users/${userId}/unblock`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error unblocking user:', error);
+        throw error;
+    }
+}
+
+// Vérifier si l'utilisateur est bloqué
+export async function isBlockedUser(userId: string) {
+    try {
+        const token = localStorage.getItem('token');
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json'
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${BASE_URL}/users/${userId}/is-blocked`, {
+            headers
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error checking block status:', error);
+        throw error;
+    }
+}
+
+// Récupérer la liste des utilisateurs bloqués
+export async function getBlockedUsers() {
+    try {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            throw new Error('No token found. Please log in to see blocked users.');
+        }
+
+        const response = await fetch(`${BASE_URL}/users/blockedlist`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching blocked users:', error);
         throw error;
     }
 }

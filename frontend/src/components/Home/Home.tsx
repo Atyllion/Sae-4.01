@@ -13,6 +13,7 @@ import Login from '../Log-in/Log-in';
 import Signin from '../Sign-in/Sign-in';
 import Backoffice from '../Backoffice/Backoffice';
 import Profil from '../Profil/Profil';
+import BlockedUsers from '../BlockedUsers/BlockedUsers';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Gère l'authentification
@@ -91,7 +92,7 @@ export default function Home() {
         />
 
         {/* Page Paramètres */}
-        <Route 
+        <Route
           path="/parametres"
           element={
             localStorage.getItem('token') ? (
@@ -99,7 +100,7 @@ export default function Home() {
             ) : (
               <Navigate to="/login" replace />
             )
-          } 
+          }
         />
 
         {/* Pages de connexion et d'inscription */}
@@ -141,6 +142,10 @@ export default function Home() {
             </div>
           }
         />
+        
+        {/* Route pour voir les utilisateurs bloquer */}
+        <Route path="/blocked-users" element={<BlockedUsers />} />
+
       </Routes>
     </Router>
   );

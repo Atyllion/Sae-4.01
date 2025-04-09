@@ -2,6 +2,8 @@ import React from 'react';
 import FollowButton from '../Follow-Button/FollowButton';
 import ProfilPicture from '../Profil-Picture/Profil-Picture';
 import ProfilBanner from '../Profil-Banner/Profil-Banner';
+import BlockButton from '../Button-Block/Button-Block';
+import { Link } from 'react-router-dom';
 
 interface ProfileHeaderProps {
     userData: {
@@ -79,9 +81,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                         </span>
                     </div>
 
-                    {/* Bouton d'abonnement */}
+                    {/* Boutton d'intercation avec l'utilisateur */}
                     {!isCurrentUser && (
-                        <FollowButton userId={userData.id} />
+                        <div className="flex gap-2 mt-4">
+                            {/* Boutton de follow */}
+                            <FollowButton userId={userData.id} />
+                            {/* Boutton de blocage */}
+                            <BlockButton userId={userData.id} />
+                        </div>
                     )}
 
                     {/* Status de l'utilisateur */}
@@ -95,16 +102,27 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                         </p>
                     )}
 
-                    {/* Bouton d'acces aux paramètres */}
+                    {/* Bouton d'acces aux paramètres + acces aux utilisateur bloqués */}
                     {isCurrentUser && (
-                        <button
-                            className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 transition-all duration-300 active:scale-95 active:bg-red cursor-pointer"
-                            title="Modifier le profil"
-                            onClick={() => window.location.href = '/parametres'}
-                        >
-                            Modifier le profil
-                        </button>
+                        <div className='flex flex-row gap-2 min-w-40'>
+                            <Link
+                                className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 transition-all duration-300 active:scale-95 active:bg-red cursor-pointer hover:shadow-md"
+                                title='Voir les utilisateurs que vous avez bloqués'
+                                to="/blocked-users"
+                                >
+                                Utilisateurs bloqués
+                            </Link>
+
+                            <Link
+                                className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 transition-all duration-300 active:scale-95 active:bg-red cursor-pointer hover:shadow-md"
+                                title="Modifier le profil"
+                                to="/parametres"
+                            >
+                                Modifier le profil
+                            </Link>
+                        </div>
                     )}
+
                 </div>
 
             </div>

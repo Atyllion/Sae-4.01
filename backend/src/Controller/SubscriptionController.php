@@ -13,15 +13,18 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\SerializerInterface;
+use App\Entity\UserBlock;
+use App\Repository\UserBlockRepository;
 
 class SubscriptionController extends AbstractController
 {
-    #[Route('/api/users/{id}/follow', name: 'user.follow', methods: ['POST'])]
+    #[Route('/users/{id}/follow', name: 'user.follow', methods: ['POST'])]
     public function follow(
         int $id,
         UserRepository $userRepository,
         SubscriptionRepository $subscriptionRepository,
         EntityManagerInterface $entityManager,
+        UserBlockRepository $blockRepository,
         #[CurrentUser] ?User $currentUser
     ): JsonResponse {
         // Vérifier l'authentification
@@ -31,6 +34,13 @@ class SubscriptionController extends AbstractController
 
         // Trouver l'utilisateur à suivre
         $userToFollow = $userRepository->find($id);
+
+        $isBlocked = $blockRepository->findBlock($userToFollow, $currentUser);
+
+        if ($isBlocked) {
+            return new JsonResponse(['error' => 'You cannot follow this user because they have blocked you'], Response::HTTP_FORBIDDEN);
+        }
+
         if (!$userToFollow) {
             return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
@@ -67,7 +77,7 @@ class SubscriptionController extends AbstractController
         ]);
     }
 
-    #[Route('/api/users/{id}/unfollow', name: 'user.unfollow', methods: ['POST'])]
+    #[Route('/users/{id}/unfollow', name: 'user.unfollow', methods: ['POST'])]
     public function unfollow(
         int $id,
         UserRepository $userRepository,
@@ -109,7 +119,7 @@ class SubscriptionController extends AbstractController
         ]);
     }
 
-    #[Route('/api/users/{id}/is-following', name: 'user.is_following', methods: ['GET'])]
+    #[Route('/users/{id}/is-following', name: 'user.is_following', methods: ['GET'])]
     public function isFollowing(
         int $id,
         UserRepository $userRepository,

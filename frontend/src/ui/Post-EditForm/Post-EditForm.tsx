@@ -131,7 +131,7 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
                                     <button
                                         type="button"
                                         onClick={() => removeExistingMedia(mediaPath)}
-                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-100"
                                     >
                                         ×
                                     </button>
@@ -161,7 +161,7 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
                                     <button
                                         type="button"
                                         onClick={() => removeNewMedia(index)}
-                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer active:scale-95 transition-all duration-100"
                                     >
                                         ×
                                     </button>
@@ -186,7 +186,7 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
                 <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
+                    className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 cursor-pointer active:scale-95 transition-all duration-100"
                 >
                     Ajouter un média
                 </button>
@@ -199,14 +199,14 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
             <div className="flex justify-end gap-2">
                 <button
                     onClick={onCancel}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer active:scale-95 transition-all duration-100"
                     disabled={isSubmitting}
                 >
                     Annuler
                 </button>
                 <button
                     onClick={handleSubmit}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 cursor-pointer active:scale-95 transition-all duration-100"
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
