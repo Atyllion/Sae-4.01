@@ -14,7 +14,8 @@ export default function Post({
     id,
     user,
     repliesCount: initialRepliesCount = 0,
-    media = []
+    media = [],
+    isCensored = false,
 }: {
     content: string;
     created_at: string;
@@ -22,6 +23,7 @@ export default function Post({
     user: { id: number; username: string; isBanned?: boolean };
     repliesCount?: number;
     media?: string[];
+    isCensored?: boolean;
 }) {
     // État pour gérer les interactions utilisateur
     const [isAuthor, setIsAuthor] = useState(false);
@@ -38,6 +40,10 @@ export default function Post({
     const [editError, setEditError] = useState('');
     const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
     const [mediaToRemove, setMediaToRemove] = useState<string[]>([]);
+
+    const censoredMessage = "Ce message enfreint les conditions d'utilisation de la plateforme";
+    const isContentCensored = content === censoredMessage;
+    const effectiveIsCensored = isCensored || isContentCensored;
 
     // Vérifier si l'utilisateur connecté est l'auteur du post
     useEffect(() => {
@@ -126,6 +132,7 @@ export default function Post({
                     showDeleteConfirmation={showDeleteConfirmation}
                     setShowDeleteConfirmation={setShowDeleteConfirmation}
                     postId={id}
+                    isCensored={effectiveIsCensored}
                 />
             )}
 
@@ -133,7 +140,7 @@ export default function Post({
             <PostHeader user={user} isAuthor={isAuthor} userBanned={userBanned} />
 
             {/* Formulaire d'édition ou contenu du post */}
-            {isAuthor && showEditForm ? (
+            {isAuthor && showEditForm && !effectiveIsCensored ? (
                 <PostEditForm
                     content={currentContent}
                     media={currentMedia}
@@ -143,7 +150,7 @@ export default function Post({
                     error={editError}
                 />
             ) : (
-                <PostContent content={currentContent} media={currentMedia} />
+                <PostContent content={currentContent} media={currentMedia} isCensored={effectiveIsCensored} />
             )}
 
             {/* Pied de page du post */}
@@ -155,10 +162,11 @@ export default function Post({
                 onToggleReplies={toggleReplySection}
                 userBanned={userBanned}
                 isEditing={showEditForm}
+                isCensored={effectiveIsCensored}
             />
 
             {/* Section de réponses - Visible seulement quand activée et pas en mode édition */}
-            {showReplySection && !showEditForm && (
+            {showReplySection && !showEditForm && !effectiveIsCensored && (
                 <ReplySection
                     postId={id}
                     isExpanded={showReplySection}

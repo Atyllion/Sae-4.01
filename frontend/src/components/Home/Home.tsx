@@ -117,7 +117,9 @@ export default function Home() {
           path="/backoffice"
           element={
             userAdmin ? (
-              <Backoffice />
+              <>
+                <Backoffice />
+              </>
             ) : (
               <Navigate to="/access-denied" replace />
             )
@@ -142,7 +144,7 @@ export default function Home() {
             </div>
           }
         />
-        
+
         {/* Route pour voir les utilisateurs bloquer */}
         <Route path="/blocked-users" element={<BlockedUsers />} />
 

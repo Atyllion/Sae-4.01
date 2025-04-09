@@ -9,16 +9,18 @@ interface PostFooterProps {
     onToggleReplies: () => void;
     userBanned: boolean;
     isEditing: boolean;
+    isCensored: boolean;
 }
 
-const PostFooter: React.FC<PostFooterProps> = ({ 
-    created_at, 
-    postId, 
-    repliesCount, 
+const PostFooter: React.FC<PostFooterProps> = ({
+    created_at,
+    postId,
+    repliesCount,
     showReplies,
     onToggleReplies,
     userBanned,
-    isEditing
+    isEditing,
+    isCensored
 }) => {
     return (
         <>
@@ -39,7 +41,7 @@ const PostFooter: React.FC<PostFooterProps> = ({
             </p>
 
             {/* Composant d'interaction du post - Ne pas afficher si l'utilisateur est banni ou en mode édition */}
-            {!userBanned && !isEditing && (
+            {!userBanned && !isEditing && !isCensored && (
                 <div className="flex flex-row items-center gap-4 mt-3 border-t pt-2 border-gray-200">
                     <PostInteraction
                         postId={postId}
@@ -47,6 +49,13 @@ const PostFooter: React.FC<PostFooterProps> = ({
                         showReplies={showReplies}
                         onToggleReplies={onToggleReplies}
                     />
+                </div>
+            )}
+
+            {/* Message explicatif pour les posts censurés */}
+            {isCensored && (
+                <div className="mt-3 text-xs text-gray-500 italic border-t pt-2 border-gray-200">
+                    Ce contenu a été modéré et les interactions ont été désactivées.
                 </div>
             )}
         </>

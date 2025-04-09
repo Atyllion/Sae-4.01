@@ -56,16 +56,19 @@ class PostController extends AbstractController
                 'id' => $post->getId(),
                 'content' => $isBanned
                     ? "Ce compte a été bloqué pour non respect des conditions d'utilisation"
-                    : $post->getContent(),
+                    : ($post->isCensored()
+                        ? "Ce message enfreint les conditions d'utilisation de la plateforme"
+                        : $post->getContent()),
                 'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
                 'user' => [
                     'id' => $user->getId(),
                     'username' => $user->getUsername(),
                     'isBanned' => $isBanned,
                 ],
-                'likesCount' => $isBanned ? 0 : count($post->getLikes()),
-                'repliesCount' => $isBanned ? 0 : count($post->getReplies()),
-                'media' => $isBanned ? [] : $mediaData
+                'likesCount' => $isBanned || $post->isCensored() ? 0 : count($post->getLikes()),
+                'repliesCount' => $isBanned || $post->isCensored() ? 0 : count($post->getReplies()),
+                'media' => $isBanned || $post->isCensored() ? [] : $mediaData,
+                'isCensored' => $post->isCensored()
             ];
         }
 
@@ -94,7 +97,11 @@ class PostController extends AbstractController
 
         $response = [
             'id' => $post->getId(),
-            'content' => $isBanned ? "" : $post->getContent(),
+            'content' => $isBanned
+                ? "Ce compte a été bloqué pour non respect des conditions d'utilisation"
+                : ($post->isCensored()
+                    ? "Ce message enfreint les conditions d'utilisation de la plateforme"
+                    : $post->getContent()),
             'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
             'user' => [
                 'id' => $user->getId(),
@@ -105,7 +112,8 @@ class PostController extends AbstractController
             'repliesCount' => $isBanned ? 0 : count($post->getReplies()),
             'media' => $isBanned ? [] : array_map(function ($media) {
                 return $media->getMediaPath();
-            }, $post->getMedia()->toArray())
+            }, $post->getMedia()->toArray()),
+            'isCensored' => $post->isCensored()
         ];
 
         return $this->json($response);
@@ -155,7 +163,9 @@ class PostController extends AbstractController
                 'id' => $post->getId(),
                 'content' => $isUserBanned
                     ? ""
-                    : $post->getContent(),
+                    : ($post->isCensored()
+                        ? "Ce message enfreint les conditions d'utilisation de la plateforme"
+                        : $post->getContent()),
                 'created_at' => $post->getCreatedAt()->format('Y-m-d H:i:s'),
                 'user' => [
                     'id' => $post->getUser()->getId(),
@@ -165,7 +175,8 @@ class PostController extends AbstractController
                 // Ne pas inclure les likes si l'utilisateur est banni
                 'likesCount' => $isUserBanned ? 0 : count($post->getLikes()),
                 'repliesCount' => $isUserBanned ? 0 : count($post->getReplies()),
-                'media' => $isUserBanned ? [] : $mediaData
+                'media' => $isUserBanned ? [] : $mediaData,
+                'isCensored' => $post->isCensored()
             ];
         }
 
@@ -325,9 +336,6 @@ class PostController extends AbstractController
     }
 
     // Modification d'un post
-    // Réparer la fonction update du contrôleur
-
-    // Modification d'un post
     #[Route('/post/{id}/update', name: 'post.update', methods: ['POST'])]
     public function update(
         int $id,
@@ -475,5 +483,32 @@ class PostController extends AbstractController
             $logger->error('Stack trace: ' . $e->getTraceAsString());
             return new JsonResponse(['error' => 'Failed to update post: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    // Censure d'un post
+    #[Route('/post/{id}/censor', name: 'post.censor', methods: ['POST'])]
+    public function censorPost(
+        int $id,
+        PostRepository $postRepository,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $user = $this->getUser();
+        if (!$user instanceof User || !in_array('ROLE_ADMIN', $user->getRoles())) {
+            return new JsonResponse(['error' => 'Unauthorized access'], Response::HTTP_FORBIDDEN);
+        }
+
+        $post = $postRepository->find($id);
+        if (!$post) {
+            return new JsonResponse(['error' => 'Post not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Toggle censored status
+        $post->setCensored(!$post->isCensored());
+        $entityManager->flush();
+
+        return $this->json([
+            'id' => $post->getId(),
+            'isCensored' => $post->isCensored()
+        ]);
     }
 }

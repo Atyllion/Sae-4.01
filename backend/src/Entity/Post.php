@@ -40,6 +40,9 @@ class Post
     #[ORM\OneToMany(mappedBy: 'post', targetEntity: PostMedia::class, cascade: ['persist', 'remove'])]
     private Collection $media;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isCensored = false;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
@@ -193,6 +196,18 @@ class Post
                 $media->setPost(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isCensored(): bool
+    {
+        return $this->isCensored;
+    }
+
+    public function setCensored(bool $isCensored): self
+    {
+        $this->isCensored = $isCensored;
 
         return $this;
     }

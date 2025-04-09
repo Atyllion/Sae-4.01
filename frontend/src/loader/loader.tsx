@@ -945,6 +945,33 @@ export function getImageUrl(path: string | null) {
     return `${BASE_URL}/uploads/${path}`;
 }
 
+// Censurer un post pour l'admin
+export async function censorPost(postId) {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('No token found');
+        }
+        
+        const response = await fetch(`${BASE_URL}/post/${postId}/censor`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error censoring post:', error);
+        throw error;
+    }
+}
+
 // MISE A JOUR DES INFOS UTILISATEUR
 
 // Mettre à jour les détails du profil (bio, localisation)
