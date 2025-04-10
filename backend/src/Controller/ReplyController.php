@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use App\Entity\Reply;
 use App\Entity\ReplyLike;
 use App\Entity\User;
+use App\Entity\Post;
 use App\Entity\UserBlock;
 use App\Repository\PostRepository;
 use App\Repository\ReplyRepository;
@@ -104,15 +105,15 @@ class ReplyController extends AbstractController
         }
 
         $postAuthor = $post->getUser();
-        
+
         // Récupérer toutes les réponses du post
         $replies = $replyRepository->findBy(['post' => $post]);
         $visibleRepliesCount = 0;
-        
+
         foreach ($replies as $reply) {
             $replyUser = $reply->getUser();
             $isBlocked = $blockRepository->findBlock($postAuthor, $replyUser) !== null;
-            
+
             if (!$isBlocked) {
                 $visibleRepliesCount++;
             }
@@ -229,6 +230,7 @@ class ReplyController extends AbstractController
         ReplyRepository $replyRepository,
         ReplyLikeRepository $replyLikeRepository,
         EntityManagerInterface $entityManager,
+        UserBlockRepository $blockRepository,
         int $id
     ): JsonResponse {
         $user = $this->getUser();
@@ -236,13 +238,22 @@ class ReplyController extends AbstractController
             return new JsonResponse(['error' => 'User not authenticated'], Response::HTTP_UNAUTHORIZED);
         }
 
-        if ($user->isBanned()) {
-            return new JsonResponse(['error' => 'Banned users cannot like replies'], Response::HTTP_FORBIDDEN);
-        }
-
         $reply = $replyRepository->find($id);
         if (!$reply) {
             return new JsonResponse(['error' => 'Reply not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Récupérer le post parent de la réponse
+        $post = $reply->getPost();
+
+        // Vérifie si l'utilisateur a été bloqué par l'auteur du post
+        $postAuthor = $post->getUser();
+        if ($blockRepository->isUserBlocked($user, $postAuthor)) {
+            return new JsonResponse(['error' => 'You cannot like this reply because you have been blocked by the author'], Response::HTTP_FORBIDDEN);
+        }
+
+        if ($user->isBanned()) {
+            return new JsonResponse(['error' => 'Banned users cannot like replies'], Response::HTTP_FORBIDDEN);
         }
 
         $like = $replyLikeRepository->findOneByUserAndReply($user, $reply);

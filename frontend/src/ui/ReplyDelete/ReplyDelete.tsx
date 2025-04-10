@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { deleteReply } from '../../loader/loader';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 interface ReplyDeleteProps {
     replyId: string;
@@ -37,28 +38,30 @@ export default function ReplyDelete({ replyId, onDelete, isAuthor }: ReplyDelete
         <div className='w-full flex justify-end'>
             {showDeleteConfirmation ? (
                 <div className="flex flex-col items-center gap-2 w-full">
-                    <button
-                        className="text-s text-white bg-red-500 hover:bg-red-700 px-3 py-1 w-full rounded cursor-pointer active:scale-95 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    <DynamicButton
+                        label={isDeleting ? 'Suppression...' : 'Confirmer'}
                         onClick={handleDelete}
+                        variant="danger"
                         disabled={isDeleting}
-                    >
-                        {isDeleting ? 'Suppression...' : 'Confirmer'}
-                    </button>
-                    <button
-                        className="text-s text-white bg-gray-500 hover:bg-gray-700 px-3 py-1 w-full rounded cursor-pointer active:scale-95 transition-colors"
+                        isLoading={isDeleting}
+                        className="w-full"
+                        size="small"
+                    />
+                    <DynamicButton
+                        label="Annuler"
                         onClick={() => setShowDeleteConfirmation(false)}
-                    >
-                        Annuler
-                    </button>
+                        variant="secondary"
+                        size="small"
+                        className="w-full"
+                    />
                 </div>
             ) : (
-                <button
-                    className="text-s text-white bg-red-500 hover:bg-red-700 px-2 py-1 rounded cursor-pointer active:scale-95 transition-colors"
-                    onClick={() => setShowDeleteConfirmation(true)}
-                    title="Supprimer la réponse"
-                >
-                    Supprimer
-                </button>
+                <DynamicButton
+                label="Supprimer"
+                onClick={() => setShowDeleteConfirmation(true)}
+                variant="danger"
+                size="small"
+            />
             )}
         </div>
     );

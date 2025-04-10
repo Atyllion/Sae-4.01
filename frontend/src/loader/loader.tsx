@@ -310,7 +310,6 @@ export async function patchUserById(userId: string, userData: { username?: strin
 
 // Récupérer le token de l'utilisateur
 export async function loginUser(userData: { email: string; password: string }) {
-    console.log("userData", userData);
 
     try {
         const response = await fetch(`${BASE_URL}/login`, {
@@ -346,7 +345,13 @@ export async function fetchUserToken(): Promise<Response> {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
-            throw new Error('No token found in localStorage');
+            return new Response(JSON.stringify({ 
+                authenticated: false, 
+                message: 'No authentication token found' 
+            }), { 
+                status: 401,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
 
         const response = await fetch(`${BASE_URL}/get_token`, {
@@ -359,7 +364,6 @@ export async function fetchUserToken(): Promise<Response> {
         });
 
         if (response.status === 401) {
-            // le token n'est plus valide, on le supprime
             console.error('Token expired or invalid. Removing from localStorage.');
             localStorage.removeItem('token');
             throw new Error('Your session has expired. Please log in again.');

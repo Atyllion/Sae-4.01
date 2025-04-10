@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toggleLike, getPostLikes, fetchUserToken } from "../../loader/loader";
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 interface PostLikesProps {
     postId: string;

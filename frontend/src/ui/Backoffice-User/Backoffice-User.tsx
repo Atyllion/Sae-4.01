@@ -1,5 +1,6 @@
 // loader
 import { fetchUsers, banUser, unbanUser, fetchUserById, fetchUserToken } from '../../loader/loader';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 // react
 import React from 'react';
@@ -208,14 +209,12 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
                 <div className='flex flex-col gap-4 w-full'>
                     {/* bouton de submit */}
                     <div className="flex justify-center w-full">
-                        <button
-                            id='save__button'
+                        <DynamicButton
+                            label="Enregistrer les modifications"
                             onClick={handleSave}
-                            type="submit"
-                            className="padding bg-indigo-600 text-white font-medium p-4 rounded-md shadow hover:bg-indigo-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 w-full"
-                        >
-                            Enregistrer les modifications
-                        </button>
+                            variant="primary"
+                            className="padding font-medium p-4 rounded-md shadow w-full"
+                        />
                     </div>
 
                     {/* message d'erreur */}
@@ -228,22 +227,14 @@ export default function BackofficeUser({ user }: { user: { id: string; email: st
                     {/* Boutons de ban/unban */}
                     <div className="flex flex-col justify-center w-full">
                         {String(user.id) !== String(currentUserId) && (
-                            <button
-                                id={isBanned ? "unban__button" : "ban__button"}
+                            <DynamicButton
+                                label={isProcessing ? 'En cours...' : (isBanned ? 'Débannir l\'utilisateur' : 'Bannir l\'utilisateur')}
                                 onClick={isBanned ? handleUnbanUser : handleBanUser}
+                                variant={isBanned ? "success" : "danger"}
                                 disabled={isProcessing}
-                                className={`padding text-white font-medium p-3 rounded-md shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-opacity-75 disabled:opacity-50 w-full ${isBanned
-                                    ? "bg-green-600 hover:bg-green-700 focus:ring-green-400"
-                                    : "bg-red-600 hover:bg-red-700 focus:ring-red-400"
-                                    }`}
-                            >
-                                {isProcessing
-                                    ? 'En cours...'
-                                    : isBanned
-                                        ? 'Débannir l\'utilisateur'
-                                        : 'Bannir l\'utilisateur'
-                                }
-                            </button>
+                                isLoading={isProcessing}
+                                className="padding font-medium p-3 rounded-md shadow w-full"
+                            />
                         )}
                     </div>
                 </div>

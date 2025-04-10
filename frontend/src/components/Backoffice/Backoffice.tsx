@@ -3,6 +3,7 @@ import BackofficeUsers from '../../ui/Backoffice-Users/Backoffice-Users';
 import BackofficePosts from '../../ui/Backoffice-Posts/Backoffice-Posts';
 import NavBar from '../NavBar/NavBar';
 import BackButton from '../../ui/Button-Back/Button-Back';
+import DynamicButton from '../../ui/Button-CTA/Button-CTA';
 
 // Components
 import React from 'react';
@@ -56,33 +57,32 @@ export default function Backoffice() {
                     <h1 className="text-2xl font-bold mb-4">Administration</h1>
 
                     <div className="flex gap-4 border-b">
-                        <button
-                            onClick={() => setActivePage('posts')}
-                            className={`px-4 py-2 font-bold cursor-pointer active:scale-95 transition-all ${
-                                activePage === 'posts' 
-                                    ? 'text-blue-600 border-b-2 border-blue-600' 
-                                    : 'text-gray-500 hover:text-blue-600'
-                            }`}
-                        >
-                            Modération des posts
-                        </button>
 
-                        <button
+                        <DynamicButton
+                            label="Modération des posts"
+                            onClick={() => setActivePage('posts')}
+                            variant={activePage === 'posts' ? "primary" : "secondary"}
+                            className={`px-4 py-2 font-bold ${activePage === 'posts'
+                                ? 'text-blue-600 border-b-2 border-blue-600'
+                                : 'text-gray-500 hover:text-blue-600'
+                                }`}
+                        />
+
+                        <DynamicButton
+                            label="Gestion des utilisateurs"
                             onClick={() => setActivePage('users')}
-                            className={`px-4 py-2 font-bold cursor-pointer active:scale-95 transition-all ${
-                                activePage === 'users' 
-                                    ? 'text-blue-600 border-b-2 border-blue-600' 
+                            variant={activePage === 'users' ? "primary" : "secondary"}
+                            className={`px-4 py-2 font-bold ${activePage === 'users'
+                                    ? 'text-blue-600 border-b-2 border-blue-600'
                                     : 'text-gray-500 hover:text-blue-600'
-                            }`}
-                        >
-                            Gestion des utilisateurs
-                        </button>
+                                }`}
+                        />
                     </div>
                 </div>
 
                 {activePage === 'posts' ? <BackofficePosts /> : <BackofficeUsers />}
             </div>
-            
+
             <NavBar isAdmin={userAdmin} />
         </div>
     );

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { fetchUserToken } from '../../loader/loader';
+import DynamicButton from '../../ui/Button-CTA/Button-CTA';
 
 // importer UI
 import NewPost from '../../ui/NewPost/NewPost';

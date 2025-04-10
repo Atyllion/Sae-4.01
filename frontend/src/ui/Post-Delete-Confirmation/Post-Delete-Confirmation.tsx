@@ -1,9 +1,10 @@
 import React from "react";
 import { deletePostById } from '../../loader/loader';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 interface PostDeleteConfirmationProps {
-    id: string;
-    onCancel: () => void;
+        id: string;
+        onCancel: () => void;
 }
 
 export default function PostDeleteConfirmation({ id, onCancel }: PostDeleteConfirmationProps) {
@@ -14,24 +15,24 @@ export default function PostDeleteConfirmation({ id, onCancel }: PostDeleteConfi
 
                         <div className='flex justify-evenly w-full m-2 gap-2'>
                                 {/* Oui */}
-                                <button
-                                        className='bg-red-500 text-white text-sm px-3 py-1 w-full h-full rounded-md hover:bg-red-600 active:scale-95 transition-transform duration-200 cursor-pointer'
+                                <DynamicButton
+                                        label="Oui"
                                         onClick={() => {
                                                 deletePostById(id);
                                                 alert('Post supprimé avec succès.');
                                                 window.location.reload();
                                         }}
-                                >
-                                        Oui
-                                </button>
+                                        variant="danger"
+                                        className="text-sm px-3 py-1 w-full"
+                                />
 
                                 {/* Non */}
-                                <button
-                                        className='bg-gray-400 text-white text-sm px-3 py-1 w-full h-full rounded-md hover:bg-gray-500 active:scale-95 transition-transform duration-200 cursor-pointer'
+                                <DynamicButton
+                                        label="Non"
                                         onClick={onCancel}
-                                >
-                                        Non
-                                </button>
+                                        variant="secondary"
+                                        className="text-sm px-3 py-1 w-full"
+                                />
                         </div>
                 </div>
         );

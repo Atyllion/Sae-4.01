@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import zxcvbn from 'zxcvbn'; // Importation de la bibliothèque pour évaluer la force du mot de passe
-import { signInUser } from '../../loader/loader'; // Importation de la fonction pour gérer la connexion utilisateur
+import zxcvbn from 'zxcvbn';
+import { signInUser } from '../../loader/loader';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 // Composant principal du formulaire de connexion
 export default function SignInForm() {
@@ -70,9 +71,9 @@ export default function SignInForm() {
     // Fonction pour gérer la soumission du formulaire
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-    
+
         if (!isFormValid()) return;
-    
+
         try {
             const response = await signInUser(formData);
             alert('User created successfully !');
@@ -109,84 +110,77 @@ export default function SignInForm() {
         >
             {/* Champ pour le nom d'utilisateur */}
             <label className="flex flex-col">
-            Username
-            <input
-                required
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                className={`p-2 rounded-md border ${
-                errors.username ? 'border-red-500' : 'border-gray-300'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black`}
-            />
-            {errors.username && (
-                <span className="text-red-500 text-sm">{errors.username}</span>
-            )}
+                Username
+                <input
+                    required
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className={`p-2 rounded-md border ${errors.username ? 'border-red-500' : 'border-gray-300'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black`}
+                />
+                {errors.username && (
+                    <span className="text-red-500 text-sm">{errors.username}</span>
+                )}
             </label>
 
             {/* Champ pour l'email */}
             <label className="flex flex-col">
-            Email
-            <input
-                required
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={`p-2 rounded-md border ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black`}
-            />
-            {errors.email && (
-                <span className="text-red-500 text-sm">{errors.email}</span>
-            )}
+                Email
+                <input
+                    required
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={`p-2 rounded-md border ${errors.email ? 'border-red-500' : 'border-gray-300'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black`}
+                />
+                {errors.email && (
+                    <span className="text-red-500 text-sm">{errors.email}</span>
+                )}
             </label>
 
             {/* Champ pour le mot de passe */}
             <label className="flex flex-col">
-            Password
-            <input
-                required
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`p-2 rounded-md border ${
-                errors.password ? 'border-red-500' : 'border-gray-300'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            />
-            {errors.password && (
-                <span className="text-red-500 text-sm">{errors.password}</span>
-            )}
+                Password
+                <input
+                    required
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={`p-2 rounded-md border ${errors.password ? 'border-red-500' : 'border-gray-300'
+                        } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+                {errors.password && (
+                    <span className="text-red-500 text-sm">{errors.password}</span>
+                )}
             </label>
 
             {/* Visualisateur de force du mot de passe */}
             <div className="mt-2">
-            <div
-                style={{
-                height: '10px',
-                width: '100%',
-                backgroundColor: getStrengthColor(passwordScore),
-                }}
-            />
-            <p className="text-sm mt-1">
-                Password strength : {['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'][passwordScore]}
-            </p>
+                <div
+                    style={{
+                        height: '10px',
+                        width: '100%',
+                        backgroundColor: getStrengthColor(passwordScore),
+                    }}
+                />
+                <p className="text-sm mt-1">
+                    Password strength : {['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'][passwordScore]}
+                </p>
             </div>
 
             {/* Bouton de soumission */}
-            <button
-            type="submit"
-            disabled={!isFormValid()}
-            className={`p-2 rounded-md font-bold cursor-pointer ${
-                isFormValid()
-                ? 'hover:bg-fg hover:text-bg bg-bg text-white'
-                : 'bg-gray-400 text-gray-700 cursor-not-allowed'
-            } transition-all duration-200`}
-            >
-            Sign In
-            </button>
+            <DynamicButton
+                label="Sign In"
+                onClick={() => { }} // Le formulaire gère déjà la soumission
+                variant="primary"
+                disabled={!isFormValid()}
+                className={`w-full ${!isFormValid() ? 'opacity-50' : ''}`}
+            />
         </form>
     );
 }

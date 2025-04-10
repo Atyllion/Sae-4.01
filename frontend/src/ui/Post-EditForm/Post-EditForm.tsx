@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { isMediaFileSupported, getPostMediaUrl } from '../../loader/loader';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 interface PostEditFormProps {
     content: string;
@@ -10,7 +11,7 @@ interface PostEditFormProps {
     error: string;
 }
 
-const PostEditForm: React.FC<PostEditFormProps> = ({ 
+const PostEditForm: React.FC<PostEditFormProps> = ({
     content,
     media,
     onSave,
@@ -24,7 +25,7 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
     const [newMediaFiles, setNewMediaFiles] = useState<File[]>([]);
     const [newMediaPreviews, setNewMediaPreviews] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    
+
     const maxCharacters = 280;
     const maxMediaFiles = 4;
 
@@ -37,25 +38,25 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
 
     const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || e.target.files.length === 0) return;
-        
+
         const files = Array.from(e.target.files);
         const validFiles = files.filter(file => isMediaFileSupported(file));
-        
+
         if (validFiles.length === 0) return;
-        
+
         // Limiter le nombre de fichiers
         const remainingSlots = maxMediaFiles - (currentMedia.length - mediaToRemove.length + newMediaFiles.length);
         const filesToAdd = validFiles.slice(0, remainingSlots);
-        
+
         if (filesToAdd.length === 0) return;
-        
+
         // Ajouter les nouveaux fichiers
         setNewMediaFiles(prev => [...prev, ...filesToAdd]);
-        
+
         // Créer des prévisualisations
         const newPreviews = filesToAdd.map(file => URL.createObjectURL(file));
         setNewMediaPreviews(prev => [...prev, ...newPreviews]);
-        
+
         // Reset the file input
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
@@ -76,10 +77,10 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
     const handleSubmit = () => {
         // Log avant l'envoi pour vérifier que la valeur est correcte
         console.log("Submitting content:", currentContent);
-        
+
         // Assurez-vous que la valeur n'est pas undefined
         const contentToSubmit = currentContent === undefined ? "" : currentContent;
-        
+
         onSave(contentToSubmit, mediaToRemove, newMediaFiles);
     };
 
@@ -97,7 +98,7 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
                     {error}
                 </div>
             )}
-            
+
             <textarea
                 value={currentContent}
                 onChange={handleContentChange}
@@ -105,11 +106,11 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
                 rows={4}
                 placeholder="Contenu du post..."
             />
-            
+
             <div className="text-sm text-gray-500 mb-2">
                 {maxCharacters - currentContent.length} caractères restants
             </div>
-            
+
             {/* Affichage des médias existants avec option de suppression */}
             {currentMedia.length > 0 && (
                 <div className="mb-3">
@@ -118,9 +119,9 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
                         {currentMedia.map((mediaPath, index) => {
                             const mediaUrl = getPostMediaUrl(mediaPath);
                             if (!mediaUrl) return null;
-                            
+
                             const isVideo = mediaPath.match(/\.(mp4|webm|ogg)$/i);
-                            
+
                             return (
                                 <div key={index} className="relative rounded-md overflow-hidden">
                                     {isVideo ? (
@@ -141,7 +142,7 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
                     </div>
                 </div>
             )}
-            
+
             {/* Affichage des nouveaux médias ajoutés */}
             {newMediaFiles.length > 0 && (
                 <div className="mb-3">
@@ -150,7 +151,7 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
                         {newMediaFiles.map((file, index) => {
                             const previewUrl = newMediaPreviews[index];
                             const isVideo = file.type.startsWith('video/');
-                            
+
                             return (
                                 <div key={`new-${index}`} className="relative rounded-md overflow-hidden">
                                     {isVideo ? (
@@ -171,7 +172,7 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
                     </div>
                 </div>
             )}
-            
+
             {/* Bouton pour ajouter des médias */}
             <div className="mb-3">
                 <input
@@ -194,23 +195,23 @@ const PostEditForm: React.FC<PostEditFormProps> = ({
                     {currentMedia.length + newMediaFiles.length}/4 médias
                 </span>
             </div>
-            
+
             {/* Boutons d'action */}
             <div className="flex justify-end gap-2">
-                <button
+                <DynamicButton
+                    label="Annuler"
                     onClick={onCancel}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer active:scale-95 transition-all duration-100"
+                    variant="secondary"
                     disabled={isSubmitting}
-                >
-                    Annuler
-                </button>
-                <button
+                />
+
+                <DynamicButton
+                    label={isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
                     onClick={handleSubmit}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 cursor-pointer active:scale-95 transition-all duration-100"
+                    variant="primary"
                     disabled={isSubmitting}
-                >
-                    {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
-                </button>
+                    isLoading={isSubmitting}
+                />
             </div>
         </div>
     );

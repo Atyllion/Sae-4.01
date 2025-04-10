@@ -4,6 +4,7 @@ import Feed from '../Feed/Feed';
 import { data, useParams } from 'react-router-dom';
 import ProfileHeader from '../../ui/Profil-Header/Profil-Header';
 import BackButton from '../../ui/Button-Back/Button-Back';
+import DynamicButton from '../../ui/Button-CTA/Button-CTA';
 
 export default function Profil() {
     const { userId } = useParams();
@@ -23,15 +24,15 @@ export default function Profil() {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        
+
         if (!token && !userId) {
             // Si pas de token et pas d'userId, rediriger vers la page de login
             window.location.href = '/login';
             return;
         }
-        
+
         setLoading(true);
-        
+
         if (!userId && token) {
             // Profil de l'utilisateur actuellement connecté
             fetchUserToken()
@@ -59,7 +60,7 @@ export default function Profil() {
                     setUserData(null);
                     setLoading(false);
                 });
-                
+
         } else if (userId) {
             // Profil d'un autre utilisateur
             fetchUserById(userId)
@@ -71,7 +72,7 @@ export default function Profil() {
                         bio: data.bio,
                         localization: data.localization,
                     });
-                    
+
                     // Vérifier si c'est l'utilisateur courant
                     if (token) {
                         return fetchUserToken().then(res => res.json());
@@ -81,16 +82,16 @@ export default function Profil() {
                 .then((tokenData) => {
                     if (tokenData.user && tokenData.user.id == userId) {
                         setIsCurrentUser(true);
-                        
+
                         // Set individual state values instead of updating the whole object
                         if (tokenData.user.bio) {
                             getBio(tokenData.user.bio);
                         }
-                        
+
                         if (tokenData.user.localization) {
                             getLocalization(tokenData.user.localization);
                         }
-                        
+
                         // Update remaining userData properties
                         setUserData(prevData => ({
                             ...prevData,
@@ -120,12 +121,13 @@ export default function Profil() {
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                     <p>{error || "Une erreur s'est produite"}</p>
                 </div>
-                <button
+                
+                <DynamicButton
+                    label="Retour à l'accueil"
                     onClick={() => window.location.href = '/'}
-                    className="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded"
-                >
-                    Retour à l'accueil
-                </button>
+                    variant="secondary"
+                    className="mt-4 font-bold py-2 px-4 rounded"
+                />
             </div>
         );
     }
@@ -146,9 +148,9 @@ export default function Profil() {
                 />
 
                 {/* Feed avec les posts de l'utilisateur */}
-                <Feed 
-                    userId={userData.id} 
-                    title={isCurrentUser ? "Mes posts" : `Posts de ${userData.username}`} 
+                <Feed
+                    userId={userData.id}
+                    title={isCurrentUser ? "Mes posts" : `Posts de ${userData.username}`}
                 />
             </div>
         </div>

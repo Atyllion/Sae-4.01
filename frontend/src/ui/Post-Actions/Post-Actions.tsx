@@ -1,5 +1,6 @@
 import React from 'react';
 import PostDeleteConfirmation from '../Post-Delete-Confirmation/Post-Delete-Confirmation';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 interface PostActionsProps {
     showEditForm: () => void;
@@ -22,13 +23,12 @@ const PostActions: React.FC<PostActionsProps> = ({
             <div className='flex gap-2'>
 
                 {!isCensored && (
-                    <button
-                        // boutton de modification 
+                    <DynamicButton
+                        label="Modifier"
                         onClick={showEditForm}
-                        className='bg-blue-500 text-white text-sm px-3 py-1 rounded-md hover:bg-blue-600 active:scale-95 transition-transform duration-200 cursor-pointer'
-                    >
-                        Modifier
-                    </button>
+                        variant="primary"
+                        size="small"
+                    />
                 )}
 
                 {/* Bouton de suppression */}
@@ -38,12 +38,12 @@ const PostActions: React.FC<PostActionsProps> = ({
                         onCancel={() => setShowDeleteConfirmation(false)}
                     />
                 ) : (
-                    <button
+                    <DynamicButton
+                        label="Supprimer"
                         onClick={() => setShowDeleteConfirmation(true)}
-                        className='bg-red-500 text-white text-sm px-3 py-1 rounded-md hover:bg-red-600 active:scale-95 transition-transform duration-200 cursor-pointer'
-                    >
-                        Supprimer
-                    </button>
+                        variant="danger"
+                        size="small"
+                    />
                 )}
             </div>
         </div>

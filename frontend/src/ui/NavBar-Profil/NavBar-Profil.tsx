@@ -3,6 +3,7 @@ import { fetchUserToken } from '../../loader/loader';
 import DisconnectButton from '../Disconnect-Button/Disconnect-Button';
 import ProfilPicture from '../Profil-Picture/Profil-Picture';
 import { Link } from 'react-router-dom';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 export default function NavBarProfil() {
     const [username, setUsername] = useState<string | null>(null);
@@ -22,7 +23,7 @@ export default function NavBarProfil() {
                 .then((data) => {
                     setUsername(data.user.username); // Affiche username de l'utilisateur dans la navbar
                     setUserId(data.user.id); // Stocke l'ID de l'utilisateur
-                    
+
                     // Récupère le chemin de la photo de profil si disponible
                     if (data.user.profilePicturePath) {
                         setProfilePicture(`http://localhost:8080/uploads/${data.user.profilePicturePath}`);
@@ -47,7 +48,7 @@ export default function NavBarProfil() {
         <>
             {username ? (
                 <li className="flex flex-row md:flex-col gap-4 items-center">
-                    
+
                     {/* Avatar avec photo de profil personnalisée */}
                     <Link
                         className="text-bg font-bold hover:text-primary transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 cursor-pointer"
@@ -70,7 +71,7 @@ export default function NavBarProfil() {
                         ) : (
                             <img
                                 className="max-w-10 max-h-10 rounded-full aspect-square"
-                                src="/assets/profile-default.svg" 
+                                src="/assets/profile-default.svg"
                                 alt={`Profil de ${username}`}
                             />
                         )}
@@ -82,17 +83,18 @@ export default function NavBarProfil() {
                 </li>
             ) : (
                 <li className="cursor-pointer">
-                    <button
+                    <DynamicButton
                         onClick={handleClickOnLogin}
-                        className="bg-fg rounded-4xl p-2 text-bg cursor-pointer hover:shadow-lg transition-all duration-300 ease-in-out transform"
-                        title="Se connecter" 
-                    >
-                        <img
+                        variant="secondary"
+                        size='medium'
+                        label=""
+                        className="bg-fg rounded-4xl p-2 text-bg hover:shadow-lg transition-all duration-300 ease-in-out transform"
+                        icon={<img
                             className="max-w-10 max-h-10 aspect-square"
                             src="/assets/profile-default.svg"
                             alt="Profile-Default"
-                        />
-                    </button>
+                        />}
+                    />
                 </li>
             )}
         </>

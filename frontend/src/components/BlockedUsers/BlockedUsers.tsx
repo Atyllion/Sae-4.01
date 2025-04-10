@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getBlockedUsers, unblockUser } from '../../loader/loader';
 import BackButton from '../../ui/Button-Back/Button-Back';
 import { Link } from 'react-router-dom';
+import DynamicButton from '../../ui/Button-CTA/Button-CTA';
 
 interface BlockedUser {
     id: string;
@@ -91,28 +92,28 @@ export default function BlockedUsers() {
                                 <h2 className='text-md text-fg font-base mb-3'>Voulez-vous débloquer {user.username} ?</h2>
                                 <div className="flex w-full gap-2">
 
-                                    <button
+                                    <DynamicButton
+                                        label="Oui"
                                         onClick={() => confirmAction(user.id, true)}
-                                        className="px-3 py-1 w-full bg-green-500 hover:bg-green-600 active:scale-95 rounded-md transition-colors cursor-pointer text-white hover:shadow-md"
-                                    >
-                                        Oui
-                                    </button>
+                                        variant="success"
+                                        className="px-3 py-1 w-full rounded-md"
+                                    />
 
-                                    <button
+                                    <DynamicButton
+                                        label="Non"
                                         onClick={() => confirmAction(user.id, false)}
-                                        className="px-3 py-1 w-full bg-gray-500 hover:bg-gray-600 rounded-md transition-colors active:scale-95 cursor-pointer text-white hover:shadow-md"
-                                    >
-                                        Non
-                                    </button>
+                                        variant="secondary"
+                                        className="px-3 py-1 w-full rounded-md"
+                                    />
                                 </div>
                             </div>
                         ) : (
-                            <button
+                            <DynamicButton
+                                label="Débloquer"
                                 onClick={() => handleUnblockClick(user.id)}
-                                className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded-md transition-colors cursor-pointer text-white hover:shadow-md"
-                            >
-                                Débloquer
-                            </button>
+                                variant="danger"
+                                className="px-3 py-1 rounded-md"
+                            />
                         )}
                     </li>
                 ))}

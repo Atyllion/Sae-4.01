@@ -1,6 +1,7 @@
 // src/ui/FollowButton/FollowButton.tsx
 import React, { useState, useEffect } from 'react';
 import { followUser, unfollowUser, isFollowingUser } from '../../loader/loader';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 interface FollowButtonProps {
     userId: string;
@@ -15,7 +16,7 @@ export default function FollowButton({ userId }: FollowButtonProps) {
     useEffect(() => {
         const token = localStorage.getItem('token');
         setIsLoggedIn(!!token);
-        
+
         if (token) {
             loadFollowStatus();
         } else {
@@ -66,25 +67,21 @@ export default function FollowButton({ userId }: FollowButtonProps) {
 
     return (
         <div className="flex flex-row-reverse items-center justify-center gap-2">
-            
+
             {/* nombre d'abonnées */}
             <span className="text-sm text-gray-600 font-medium">
                 {followersCount} {followersCount === 1 ? "abonné" : "abonnés"}
             </span>
 
             {/* Bouton de follow */}
-            <button
+            <DynamicButton
+                label={isFollowing ? "Ne plus suivre" : "Suivre"}
                 onClick={handleToggleFollow}
-                disabled={!isLoggedIn}
-                className={`px-4 py-2 rounded-md font-medium cursor-pointer transition-all duration-200 active:scale-90 shadow-sm ${
-                    isFollowing
-                        ? 'bg-gray-200 text-gray-800 hover:bg-gray-300 border border-gray-300'
-                        : 'bg-blue-500 text-white hover:bg-blue-600 border border-blue-600'
-                }`}
-                title={isFollowing ? "Ne plus suivre cet utilisateur" : "Suivre cet utilisateur"}
-            >
-                {isFollowing ? "Ne plus suivre" : "Suivre"}
-            </button>
+                variant={isFollowing ? "secondary" : "primary"}
+                disabled={!isLoggedIn || isLoading}
+                isLoading={isLoading}
+                className="px-4 py-2"
+            />
 
         </div>
     );

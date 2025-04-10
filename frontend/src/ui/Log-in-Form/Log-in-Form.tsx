@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { loginUser } from '../../loader/loader';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 export default function LogInForm() {
   const [email, setEmail] = useState('');
@@ -71,12 +72,13 @@ export default function LogInForm() {
           className="p-2 rounded-md border border-gray-300 text-fg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </label>
-      <button
-        type="submit"
-        className="p-2 rounded-md font-bold cursor-pointer hover:bg-fg hover:text-bg bg-bg text-white transition-all duration-200"
-      >
-        Log in
-      </button>
+      
+      <DynamicButton
+        label="Log in"
+        onClick={() => { }}
+        variant="primary"
+        className="w-full"
+      />
     </form>
   );
 }

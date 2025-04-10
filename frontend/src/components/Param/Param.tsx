@@ -6,6 +6,7 @@ import {
     uploadBannerPicture,
 } from '../../loader/loader';
 import BackButton from '../../ui/Button-Back/Button-Back';
+import DynamicButton from '../../ui/Button-CTA/Button-CTA';
 
 export default function Param() {
     const [userData, setUserData] = useState({

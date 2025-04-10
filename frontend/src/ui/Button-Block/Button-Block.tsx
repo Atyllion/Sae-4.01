@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { blockUser, unblockUser, isBlockedUser } from '../../loader/loader';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 interface BlockButtonProps {
     userId: string;
@@ -13,7 +14,7 @@ export default function BlockButton({ userId }: BlockButtonProps) {
     useEffect(() => {
         const token = localStorage.getItem('token');
         setIsLoggedIn(!!token);
-        
+
         if (token) {
             loadBlockStatus();
         } else {
@@ -66,17 +67,13 @@ export default function BlockButton({ userId }: BlockButtonProps) {
     }
 
     return (
-        <button
+        <DynamicButton
+            label={isBlocked ? "Débloquer" : "Bloquer"}
             onClick={handleToggleBlock}
-            disabled={!isLoggedIn}
-            className={`px-4 py-2 rounded-md font-medium cursor-pointer transition-all duration-200 active:scale-90 shadow-sm ${
-                isBlocked
-                    ? 'bg-gray-200 text-gray-800 hover:bg-gray-300 border border-gray-300'
-                    : 'bg-red-500 text-white hover:bg-red-600 border border-red-600'
-            }`}
-            title={isBlocked ? "Débloquer cet utilisateur" : "Bloquer cet utilisateur"}
-        >
-            {isBlocked ? "Débloquer" : "Bloquer"}
-        </button>
+            variant={isBlocked ? "secondary" : "danger"}
+            disabled={!isLoggedIn || isLoading}
+            isLoading={isLoading}
+            size="small"
+        />
     );
 }

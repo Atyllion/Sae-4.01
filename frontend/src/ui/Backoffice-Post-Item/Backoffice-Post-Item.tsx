@@ -1,5 +1,6 @@
 import React from 'react';
 import { censorPost } from '../../loader/loader';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 interface BackofficePostItemProps {
     post: {

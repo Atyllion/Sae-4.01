@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAllPosts } from '../../loader/loader';
 import BackofficePostItem from '../Backoffice-Post-Item/Backoffice-Post-Item';
-import BackButton from '../Button-Back/Button-Back';
 
 export default function BackofficePosts() {
     const [posts, setPosts] = useState([]);

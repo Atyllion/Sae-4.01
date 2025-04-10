@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Post from '../../ui/Post/Post';
 import { fetchPosts, fetchUserPosts } from '../../loader/loader';
+import DynamicButton from '../../ui/Button-CTA/Button-CTA';
 
 interface FeedProps {
     userId?: string;  // Optionnel: si fourni, affichera uniquement les posts de l'utilisateur
@@ -133,13 +134,12 @@ export default function Feed({ userId, title }: FeedProps = {}) {
                 {title && <h2 className="text-xl font-semibold mt-6 mb-4">{title}</h2>}
 
                 {/* bouton de rechargement des posts */}
-                <button
-                    className='px-6 py-2 sticky bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-all duration-300 cursor-pointer active:scale-95'
-                    id='reload-feed-button'
+                <DynamicButton
+                    label="Recharger les posts"
                     onClick={reloadFeed}
-                    title='Recharger les posts'>
-                    Recharger les posts
-                </button>
+                    variant="primary"
+                    className="px-6 py-2 sticky font-semibold rounded-lg shadow-md transition-all duration-300 cursor-pointer active:scale-95"
+                />
 
                 <ul className='flex gap-8 flex-col items-center p-4 bg-transparent rounded-lg w-full my-2 list-none md:p-5'>
                     {posts.length > 0 ? (

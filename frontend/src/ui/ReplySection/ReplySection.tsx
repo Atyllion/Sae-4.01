@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchReplies, createReply } from '../../loader/loader';
 import Reply from '../Reply/Reply';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 interface ReplySectionProps {
     postId: string;
@@ -9,7 +10,7 @@ interface ReplySectionProps {
     onReplyCountChange?: (count: number) => void;
 }
 
-export default function ReplySection({ postId, isExpanded, onClose, onReplyCountChange}: ReplySectionProps) {
+export default function ReplySection({ postId, isExpanded, onClose, onReplyCountChange }: ReplySectionProps) {
     const [replies, setReplies] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -17,28 +18,28 @@ export default function ReplySection({ postId, isExpanded, onClose, onReplyCount
     const [submitting, setSubmitting] = useState(false);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
-    
+
     const maxCharacters = 280;
     const isLoggedIn = !!localStorage.getItem('token');
-    
+
     // Charger les réponses lorsque la section est ouverte
     useEffect(() => {
         if (isExpanded) {
             loadReplies();
         }
     }, [isExpanded, postId]);
-    
+
     // Fonction pour charger les réponses
     const loadReplies = async (reset = true) => {
         if (loading) return;
-        
+
         try {
             setLoading(true);
             setError(null);
-            
+
             const currentPage = reset ? 1 : page;
             const data = await fetchReplies(postId, currentPage);
-            
+
             if (reset) {
                 setReplies(data.replies);
                 if (onReplyCountChange) {
@@ -47,7 +48,7 @@ export default function ReplySection({ postId, isExpanded, onClose, onReplyCount
             } else {
                 setReplies(prev => [...prev, ...data.replies]);
             }
-            
+
             setHasMore(data.has_more);
             setPage(currentPage + 1);
         } catch (err: any) {
@@ -56,21 +57,21 @@ export default function ReplySection({ postId, isExpanded, onClose, onReplyCount
             setLoading(false);
         }
     };
-    
+
     // Fonction pour créer une nouvelle réponse
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!isLoggedIn) {
             alert('Vous devez être connecté pour répondre.');
             return;
         }
-        
+
         if (!content.trim()) {
             alert('Le contenu ne peut pas être vide.');
             return;
         }
-        
+
         setSubmitting(true);
         try {
             const newReply = await createReply(postId, content);
@@ -86,7 +87,7 @@ export default function ReplySection({ postId, isExpanded, onClose, onReplyCount
             setSubmitting(false);
         }
     };
-    
+
     // Fonction pour gérer le changement de contenu
     const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newContent = e.target.value;
@@ -94,28 +95,28 @@ export default function ReplySection({ postId, isExpanded, onClose, onReplyCount
             setContent(newContent);
         }
     };
-    
+
     // Fonction pour supprimer une réponse
     const handleDeleteReply = (replyId: string) => {
         setReplies(prev => prev.filter(reply => reply.id !== replyId));
     };
-    
+
     // Fonction pour charger plus de réponses
     const loadMore = () => {
         if (!loading && hasMore) {
             loadReplies(false);
         }
     };
-    
+
     if (!isExpanded) return null;
-    
+
     return (
         <div className="mt-3 bg-gray-50 p-4 rounded-md">
 
             {/* header réponses */}
             <div className="flex justify-between mb-4">
                 <h3 className="text-lg text-bg font-bold">Réponses</h3>
-                <button 
+                <button
                     onClick={onClose}
                     className="text-gray-500 hover:text-gray-700"
                 >
@@ -124,7 +125,7 @@ export default function ReplySection({ postId, isExpanded, onClose, onReplyCount
                     </svg>
                 </button>
             </div>
-            
+
             {/* Formulaire pour créer une réponse */}
             {isLoggedIn && (
                 <form onSubmit={handleSubmit} className="mb-4">
@@ -142,16 +143,17 @@ export default function ReplySection({ postId, isExpanded, onClose, onReplyCount
                             {maxCharacters - content.length} caractères restants
                         </div>
                     </div>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 active:scale-95 cursor-pointer disabled:opacity-50"
+                    <DynamicButton
+                        label={submitting ? 'Envoi en cours...' : 'Répondre'}
+                        onClick={() => { }} // Le formulaire gère déjà la soumission
+                        variant="primary"
                         disabled={submitting || !content.trim()}
-                    >
-                        {submitting ? 'Envoi en cours...' : 'Répondre'}
-                    </button>
+                        isLoading={submitting}
+                        className="text-sm"
+                    />
                 </form>
             )}
-            
+
             {/* Liste des réponses */}
             {loading && page === 1 ? (
                 <div className="flex justify-center py-4">
@@ -177,15 +179,16 @@ export default function ReplySection({ postId, isExpanded, onClose, onReplyCount
                             onDelete={() => handleDeleteReply(reply.id)}
                         />
                     ))}
-                    
+
                     {hasMore && (
-                        <button
+                        <DynamicButton
+                            label={loading ? 'Chargement...' : 'Voir plus de réponses'}
                             onClick={loadMore}
-                            className="w-full py-2 text-blue-500 hover:text-blue-700 text-sm text-center"
+                            variant="secondary"
                             disabled={loading}
-                        >
-                            {loading ? 'Chargement...' : 'Voir plus de réponses'}
-                        </button>
+                            isLoading={loading}
+                            className="w-full text-sm py-2"
+                        />
                     )}
                 </div>
             )}

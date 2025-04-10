@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getReplyLikes, toggleReplyLike } from '../../loader/loader';
+import DynamicButton from '../Button-CTA/Button-CTA';
 
 interface ReplyLikesProps {
     replyId: string;
