@@ -217,7 +217,7 @@ class UserController extends AbstractController
 
             // Send email verification
             $email = (new Email())
-                ->from('no-reply@example.com')
+                ->from('francois.donzaud@etu.unilim.fr')
                 ->to($user->getEmail())
                 ->subject('Please Confirm your Email Address');
             $emailVerifier->sendEmailConfirmation('user.verify_email', $user, $email);

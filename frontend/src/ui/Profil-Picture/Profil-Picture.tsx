@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { fetchUserToken } from "../../loader/loader";
 import { useParams } from "react-router-dom";
+import UrlFront from "../../loader/Url-Front/Url-Front";
 
 interface ProfilePictureProps {
     userId?: string;
 }
 
 export default function ProfilPicture({ userId: propUserId }: ProfilePictureProps) {
-    const [profilePicture, setProfilePicture] = useState<string>("/assets/profile-default.svg");
+    const defaultProfileImage = `${UrlFront()}/assets/profile-default.svg`;
+    const [profilePicture, setProfilePicture] = useState<string>(defaultProfileImage);
     const { userId: paramUserId } = useParams();
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const BASE_URL = (import.meta as any).env.VITE_API_URL;
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -22,12 +25,12 @@ export default function ProfilPicture({ userId: propUserId }: ProfilePictureProp
                 if (targetUserId) {
                     // Toujours faire cette requête, qu'on ait un token ou non
                     // car les profils publics sont accessibles sans authentification
-                    const response = await fetch(`http://localhost:8080/user/profile/${targetUserId}`);
+                    const response = await fetch(`${BASE_URL}/user/profile/${targetUserId}`);
                     if (!response.ok) throw new Error('Failed to fetch user profile');
                     const userData = await response.json();
                     
                     if (userData.profilePicturePath) {
-                        setProfilePicture(`http://localhost:8080/uploads/${userData.profilePicturePath}`);
+                        setProfilePicture(`${BASE_URL}/uploads/${userData.profilePicturePath}`);
                     }
                 } else {
                     // Pour l'utilisateur actuel, toujours besoin du token
@@ -40,7 +43,7 @@ export default function ProfilPicture({ userId: propUserId }: ProfilePictureProp
                         if (data.user.profilePicture) {
                             setProfilePicture(data.user.profilePicture);
                         } else if (data.user.profilePicturePath) {
-                            setProfilePicture(`http://localhost:8080/uploads/${data.user.profilePicturePath}`);
+                            setProfilePicture(`${BASE_URL}/uploads/${data.user.profilePicturePath}`);
                         }
                     }
                 }
@@ -66,7 +69,7 @@ export default function ProfilPicture({ userId: propUserId }: ProfilePictureProp
                     className="w-full h-full object-cover"
                     onError={(e) => {
                         e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/assets/profile-default.svg";
+                        e.currentTarget.src = defaultProfileImage;
                     }}
                 />
             )}

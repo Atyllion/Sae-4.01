@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import FollowButton from '../Follow-Button/FollowButton';
 import ProfilPicture from '../Profil-Picture/Profil-Picture';
 import ProfilBanner from '../Profil-Banner/Profil-Banner';
@@ -28,6 +28,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     loading,
     error
 }) => {
+    // État pour suivre si l'utilisateur est bloqué
+    const [isUserBlocked, setIsUserBlocked] = useState(false);
+
     if (loading) {
         return <div className="text-center p-4">Chargement du profil utilisateur...</div>;
     }
@@ -39,6 +42,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             </div>
         );
     }
+
+    // Gestionnaire pour mettre à jour l'état du blocage
+    const handleBlockStatusChange = (blocked: boolean) => {
+        setIsUserBlocked(blocked);
+    };
 
     return (
         <div className='flex flex-col gap-4 bg-white rounded-lg shadow-md items-start'>
@@ -84,10 +92,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                     {/* Boutton d'intercation avec l'utilisateur */}
                     {!isCurrentUser && (
                         <div className="flex gap-2 mt-4">
-                            {/* Boutton de follow */}
-                            <FollowButton userId={userData.id} />
+                            {/* Bouton de follow uniquement si l'utilisateur n'est pas bloqué */}
+                            {!isUserBlocked && (
+                                <FollowButton userId={userData.id} />
+                            )}
                             {/* Boutton de blocage */}
-                            <BlockButton userId={userData.id} />
+                            <BlockButton 
+                                userId={userData.id} 
+                                onBlockStatusChange={handleBlockStatusChange} 
+                            />
                         </div>
                     )}
 

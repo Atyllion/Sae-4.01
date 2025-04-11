@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { fetchUserToken } from '../../loader/loader';
 import DisconnectButton from '../Disconnect-Button/Disconnect-Button';
-import ProfilPicture from '../Profil-Picture/Profil-Picture';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import DynamicButton from '../Button-CTA/Button-CTA';
+import UrlFront from '../../loader/Url-Front/Url-Front';
 
 export default function NavBarProfil() {
+    const navigate = useNavigate();
     const [username, setUsername] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const [profilePicture, setProfilePicture] = useState<string>("/assets/profile-default.svg");
+    const BASE_URL = (import.meta as any).env.VITE_API_URL;
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -26,7 +28,7 @@ export default function NavBarProfil() {
 
                     // Récupère le chemin de la photo de profil si disponible
                     if (data.user.profilePicturePath) {
-                        setProfilePicture(`http://localhost:8080/uploads/${data.user.profilePicturePath}`);
+                        setProfilePicture(`${BASE_URL}/uploads/${data.user.profilePicturePath}`);
                     }
                 })
                 .catch((error) => {
@@ -41,7 +43,7 @@ export default function NavBarProfil() {
     }, []);
 
     function handleClickOnLogin() {
-        window.location.href = '/login';
+        navigate('/login');
     }
 
     return (
@@ -64,14 +66,14 @@ export default function NavBarProfil() {
                                     onError={(e) => {
                                         // En cas d'erreur, utiliser l'image par défaut
                                         e.currentTarget.onerror = null;
-                                        e.currentTarget.src = "/assets/profile-default.svg";
+                                        e.currentTarget.src = `${UrlFront()}/assets/profile-default.svg`;
                                     }}
                                 />
                             </div>
                         ) : (
                             <img
                                 className="max-w-10 max-h-10 rounded-full aspect-square"
-                                src="/assets/profile-default.svg"
+                                src={`${UrlFront()}/assets/profile-default.svg`}
                                 alt={`Profil de ${username}`}
                             />
                         )}
@@ -91,7 +93,7 @@ export default function NavBarProfil() {
                         className="bg-fg rounded-4xl p-2 text-bg hover:shadow-lg transition-all duration-300 ease-in-out transform"
                         icon={<img
                             className="max-w-10 max-h-10 aspect-square"
-                            src="/assets/profile-default.svg"
+                            src={`${UrlFront()}/assets/profile-default.svg`}
                             alt="Profile-Default"
                         />}
                     />

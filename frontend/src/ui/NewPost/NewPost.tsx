@@ -122,7 +122,7 @@ export default function NewPost() {
     return (
         <>
             <div className="flex flex-col items-center justify-center bg-[var(--bg-color)] rounded-lg p-4 w-full md:w-full">
-                <h1 className="text-2xl md:text-4xl leading-tight md:leading-snug">Céer un nouveau post</h1>
+                <h1 className="text-2xl md:text-4xl leading-tight md:leading-snug">Créer un nouveau post</h1>
                 
                 {error && (
                     <div className="w-full p-3 my-3 text-red-700 bg-red-100 border border-red-200 rounded-md">

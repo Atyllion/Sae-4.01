@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  base: "/",
+  base: "/~donzaud2/Sae-4.01/Cycle-C/frontend/",
   plugins: [
     react(),
     tailwindcss(),
@@ -16,7 +16,7 @@ export default defineConfig({
    port: 5173,
    strictPort: true,
    host: true,
-   origin: "http://localhost:8090",
-   allowedHosts: ["sae-frontend"]
+   origin: "https://mmi.unilim.fr/~donzaud2/Sae-4.01/Cycle-C/frontend", // URL mise à jour
+   allowedHosts: ["sae-frontend", "mmi.unilim.fr"]
   },
 });

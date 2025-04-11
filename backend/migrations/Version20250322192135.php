@@ -14,18 +14,30 @@ final class Version20250322192135 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Remove the is_verified column from the user table';
+        return 'Safe migration to ensure column compatibility';
     }
 
     public function up(Schema $schema): void
     {
-        // Supprime la colonne is_verified de la table user
-        $this->addSql('ALTER TABLE user DROP COLUMN is_verified');
+        // Vérifie d'abord si la colonne existe avant d'essayer de la supprimer
+        $columns = $this->connection->fetchAllAssociative(
+            "SHOW COLUMNS FROM user LIKE 'is_verified'"
+        );
+        
+        if (!empty($columns)) {
+            $this->addSql('ALTER TABLE user DROP COLUMN is_verified');
+        }
     }
 
     public function down(Schema $schema): void
     {
-        // Ajoute à nouveau la colonne is_verified dans la table user
-        $this->addSql('ALTER TABLE user ADD is_verified TINYINT(1) NOT NULL');
+        // Vérifier si la colonne n'existe pas avant de l'ajouter
+        $columns = $this->connection->fetchAllAssociative(
+            "SHOW COLUMNS FROM user LIKE 'is_verified'"
+        );
+        
+        if (empty($columns)) {
+            $this->addSql('ALTER TABLE user ADD is_verified TINYINT(1) NOT NULL');
+        }
     }
 }

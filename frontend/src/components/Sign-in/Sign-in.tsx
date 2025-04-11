@@ -4,6 +4,7 @@ import BackButton from '../../ui/Button-Back/Button-Back';
 
 // Import Component
 import React from 'react';
+import { Link } from "react-router-dom";
 
 export default function Signin() {
     return (
@@ -18,12 +19,12 @@ export default function Signin() {
                 </div>
                 <div className="text-center mb-6 flex flex-col items-center gap-2">
                     <p className="text-sm text-gray-600">Already have an account?</p>
-                    <a
-                        href="/login"
+                    <Link
+                        to="/login"
                         className="text-fg hover:text-bg underline transition-colors duration-200"
                     >
                         Log in
-                    </a>
+                    </Link>
                 </div>
             </div>
         </div>

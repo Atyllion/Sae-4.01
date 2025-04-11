@@ -14,18 +14,38 @@ final class Version20250322195925 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Safe version to handle is_verified column';
     }
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE user DROP is_verified');
+        // Vérifier si la colonne existe avant de la supprimer
+        $sql = "SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = '{$this->connection->getDatabase()}' 
+                AND TABLE_NAME = 'user' 
+                AND COLUMN_NAME = 'is_verified'";
+        
+        $result = $this->connection->executeQuery($sql)->fetchOne();
+        
+        if ($result) {
+            $this->addSql('ALTER TABLE user DROP is_verified');
+        }
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE user ADD is_verified TINYINT(1) NOT NULL');
+        // Vérifier si la colonne n'existe pas avant de l'ajouter
+        $sql = "SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = '{$this->connection->getDatabase()}' 
+                AND TABLE_NAME = 'user' 
+                AND COLUMN_NAME = 'is_verified'";
+        
+        $result = $this->connection->executeQuery($sql)->fetchOne();
+        
+        if (!$result) {
+            $this->addSql('ALTER TABLE user ADD is_verified TINYINT(1) NOT NULL');
+        }
     }
 }

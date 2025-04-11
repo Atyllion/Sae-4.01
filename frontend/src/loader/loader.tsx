@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = (import.meta as any).env.VITE_API_URL || 'https://mmi.unilim.fr/~donzaud2/Sae-4.01/Cycle-C/backend/public';
 
 // Récupérer un post par son ID
 export async function fetchPosts(page = 1) {

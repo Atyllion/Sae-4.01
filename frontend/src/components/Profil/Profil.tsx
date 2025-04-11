@@ -5,6 +5,7 @@ import { data, useParams } from 'react-router-dom';
 import ProfileHeader from '../../ui/Profil-Header/Profil-Header';
 import BackButton from '../../ui/Button-Back/Button-Back';
 import DynamicButton from '../../ui/Button-CTA/Button-CTA';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Profil() {
     const { userId } = useParams();
@@ -21,13 +22,14 @@ export default function Profil() {
     const [isCurrentUser, setIsCurrentUser] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
 
         if (!token && !userId) {
             // Si pas de token et pas d'userId, rediriger vers la page de login
-            window.location.href = '/login';
+            navigate('/login');
             return;
         }
 
@@ -124,7 +126,7 @@ export default function Profil() {
                 
                 <DynamicButton
                     label="Retour à l'accueil"
-                    onClick={() => window.location.href = '/'}
+                    onClick={() => <Link to={"/"}/>}
                     variant="secondary"
                     className="mt-4 font-bold py-2 px-4 rounded"
                 />

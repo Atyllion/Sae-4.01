@@ -35,8 +35,8 @@ class CorsListener implements EventSubscriberInterface
         if ($origin) {
             $response->headers->set('Access-Control-Allow-Origin', $origin);
         } else {
-            // Fallback pour localhost:8090
-            $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:8090');
+            // Fallback pour le frontend sur mmi.unilim.fr
+            $response->headers->set('Access-Control-Allow-Origin', 'https://mmi.unilim.fr');
         }
         
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
@@ -64,8 +64,8 @@ class CorsListener implements EventSubscriberInterface
         if ($origin) {
             $response->headers->set('Access-Control-Allow-Origin', $origin);
         } else {
-            // Fallback pour localhost:8090
-            $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:8090'); 
+            // Fallback pour le frontend sur mmi.unilim.fr
+            $response->headers->set('Access-Control-Allow-Origin', 'https://mmi.unilim.fr'); 
         }
         
         $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');

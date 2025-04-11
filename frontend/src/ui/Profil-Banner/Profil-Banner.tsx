@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { fetchUserToken, getPublicProfilePicture, getImageUrl } from "../../loader/loader";
 import { useParams } from "react-router-dom";
+import UrlFront from "../../loader/Url-Front/Url-Front";
 
 interface ProfilBannerProps {
     userId?: string;
 }
 
 export default function ProfilBanner({ userId: propUserId }: ProfilBannerProps) {
-    const [bannerUrl, setBannerUrl] = useState<string>("/assets/default-banner.jpg");
+    const defaultBannerPath = `${UrlFront()}/assets/default-banner.jpg`;
+    const [bannerUrl, setBannerUrl] = useState<string>(defaultBannerPath);
     const [loading, setLoading] = useState<boolean>(true);
     const { userId: paramUserId } = useParams();
+    const BASE_URL = (import.meta as any).env.VITE_API_URL;
     
     useEffect(() => {
         const fetchBanner = async () => {
@@ -34,7 +37,7 @@ export default function ProfilBanner({ userId: propUserId }: ProfilBannerProps) 
                         const data = await response.json();
 
                         if (data.user.bannerPicturePath) {
-                            setBannerUrl(`http://localhost:8080/uploads/${data.user.bannerPicturePath}`);
+                            setBannerUrl(`${BASE_URL}/uploads/${data.user.bannerPicturePath}`);
                         }
                     }
                 }
@@ -60,7 +63,7 @@ export default function ProfilBanner({ userId: propUserId }: ProfilBannerProps) 
                     className="w-full h-full object-cover"
                     onError={(e) => {
                         e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/assets/default-banner.jpg";
+                        e.currentTarget.src = defaultBannerPath;
                     }}
                 />
             )}

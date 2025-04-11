@@ -20,7 +20,7 @@ export default function Param() {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
+    const BASE_URL = (import.meta as any).env.VITE_API_URL;
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [pendingFormEvent, setPendingFormEvent] = useState<React.FormEvent | null>(null);
 
@@ -245,7 +245,7 @@ export default function Param() {
                         <div className="w-40 h-40 mb-3 bg-gray-200 rounded-full overflow-hidden">
                             {userData.profilePicturePath ? (
                                 <img
-                                    src={`${'http://localhost:8080'}/uploads/${userData.profilePicturePath}`}
+                                    src={`${BASE_URL}/uploads/${userData.profilePicturePath}`}
                                     alt="Photo de profil"
                                     className="w-full h-full object-cover"
                                 />
@@ -281,7 +281,7 @@ export default function Param() {
                         <div className="w-full h-32 mb-3 bg-gray-200 rounded overflow-hidden">
                             {userData.bannerPicturePath ? (
                                 <img
-                                    src={`${'http://localhost:8080'}/uploads/${userData.bannerPicturePath}`}
+                                    src={`${BASE_URL}/uploads/${userData.bannerPicturePath}`}
                                     alt="Bannière"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {

@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import zxcvbn from 'zxcvbn';
 import { signInUser } from '../../loader/loader';
 import DynamicButton from '../Button-CTA/Button-CTA';
+import { Navigate, useNavigate, Link  } from 'react-router-dom';
+import UrlFront from '../../loader/Url-Front/Url-Front';
 
 // Composant principal du formulaire de connexion
 export default function SignInForm() {
+    const navigate = useNavigate(); // Hook pour la navigation
+
     // État pour stocker les données du formulaire
     const [formData, setFormData] = useState({
         username: '',
@@ -80,6 +84,7 @@ export default function SignInForm() {
             setFormData({ username: '', email: '', password: '' }); // Réinitialisation du formulaire
             setErrors({ username: '', email: '', password: '' }); // Réinitialisation des erreurs
             setPasswordScore(0); // Réinitialisation du score de mot de passe
+            navigate('/login'); // Redirection vers la page de connexion
         } catch (error: any) {
             alert(error.message || 'An error occurred. Please try again.');
         }

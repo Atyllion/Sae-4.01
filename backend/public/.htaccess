@@ -1,0 +1,21 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Assurez-vous que cette ligne reflète exactement votre structure de dossiers
+    RewriteBase /~donzaud2/Sae-4.01/Cycle-C/backend/public
+    
+    # Règle de débogage - écrire les URL dans un fichier log
+    # RewriteRule .* - [E=REDIRECT_URL:%{REQUEST_URI},L]
+    
+    # Règle standard pour Symfony
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Désactiver la mise en cache pendant le débogage
+<IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+</IfModule>

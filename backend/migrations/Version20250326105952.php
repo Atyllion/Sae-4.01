@@ -14,22 +14,41 @@ final class Version20250326105952 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Safe version for post-user relationship';
     }
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE post CHANGE user_id user_id INT NOT NULL');
-        $this->addSql('ALTER TABLE post ADD CONSTRAINT FK_5A8A6C8DA76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
-        $this->addSql('CREATE INDEX IDX_5A8A6C8DA76ED395 ON post (user_id)');
+        // S'assurer que la table post existe
+        $tableExists = $this->connection->executeQuery(
+            "SHOW TABLES LIKE 'post'"
+        )->fetchOne();
+        
+        if ($tableExists) {
+            // Vérifier si la colonne user_id existe
+            $sql = "SELECT COLUMN_NAME 
+                    FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = '{$this->connection->getDatabase()}' 
+                    AND TABLE_NAME = 'post' 
+                    AND COLUMN_NAME = 'user_id'";
+            
+            $columnExists = $this->connection->executeQuery($sql)->fetchOne();
+            
+            if (!$columnExists) {
+                // Ajouter la colonne si elle n'existe pas
+                $this->addSql('ALTER TABLE post ADD user_id INT DEFAULT NULL');
+                $this->addSql('ALTER TABLE post ADD CONSTRAINT FK_5A8A6C8DA76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
+                $this->addSql('CREATE INDEX IDX_5A8A6C8DA76ED395 ON post (user_id)');
+            }
+            
+            // Ici, ajoutez le reste du code de la migration originale
+            // qui n'implique pas directement la colonne user_id
+        }
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE post DROP FOREIGN KEY FK_5A8A6C8DA76ED395');
-        $this->addSql('DROP INDEX IDX_5A8A6C8DA76ED395 ON post');
-        $this->addSql('ALTER TABLE post CHANGE user_id user_id INT DEFAULT NULL');
+        // Code pour annuler les modifications
+        // avec vérifications similaires
     }
 }
